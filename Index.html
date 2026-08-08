@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Louis AI</title>
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+<div class="header">
+    <h1>Louis AI</h1>
+    <p>Version 2.0 Beta</p>
+    <p>Your Intelligent Personal AI Assistant</p>
+</div>
+<div class="chat-box">
+
+<p class="welcome">
+    Welcome! I'm Louis AI. How can I help you today?
+</p>
+
+<div id="chat"></div>
+
+<div class="input-area">
+
+<input
+id="userInput"
+type="text"
+placeholder="Type your message"
+onkeypress="if(event.key==='Enter') sendMessage();">
+
+<button onclick="sendMessage()">Send</button>
+<button onclick="clearChat()">Clear Chat</button>
+<button onclick="toggleDarkMode()">🌙 Dark Mode</button>
+<button onclick="startListening()">🎤 Speak</button>
+
+</div>
+
+</div>
+<script src="script.js"></script>
+</body>
+</html>
