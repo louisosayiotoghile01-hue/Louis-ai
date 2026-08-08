@@ -1,0 +1,23 @@
+{
+  "science": {
+    "earth": "Earth is the third planet from the Sun.",
+    "moon": "The Moon is Earth's natural satellite."
+  },
+
+  "geography": {
+    "nigeria": "Nigeria is located in West Africa.",
+    "lagos": "Lagos is one of the largest cities in Nigeria."
+  },
+
+  "technology": {
+    "html": "HTML is used to build web pages.",
+    "css": "CSS is used to style web pages.",
+    "javascript": "JavaScript makes websites interactive.",
+    "ai": "AI stands for Artificial Intelligence."
+  },
+
+  "louis": {
+    "who created louis ai": "Louis AI was created by Louis with help from ChatGPT.",
+    "who are you": "I am Louis AI, your personal AI assistant."
+  }
+}
