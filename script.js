@@ -8,7 +8,6 @@ let learnedFacts = JSON.parse(localStorage.getItem("learnedFacts")) || {};
 let notes = JSON.parse(localStorage.getItem("notes")) || [];
 let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
 let chatMemory = JSON.parse(localStorage.getItem("chatMemory")) || [];
-const OPENAI_API_KEY = "";
 const synonyms = {
     "js": "javascript",
     "artificial intelligence": "ai",
@@ -89,30 +88,38 @@ function detectIntent(text){
 }
 async function getAIResponse(message){
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer " + OPENAI_API_KEY
-        },
-        body: JSON.stringify({
-            model: "gpt-4.1-mini",
- messages: [
-    {
-        role: "user",
-        content: message
+    try {
+
+        const response = await fetch("/api/chat", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                message: message
+            })
+
+        });
+
+        const data = await response.json();
+
+        if(!response.ok){
+            return "API Error: " + (data.error || "Something went wrong.");
+        }
+
+        return data.reply || "I didn't receive a reply.";
+
+    } catch(error) {
+
+        console.error("API connection error:", error);
+
+        return "Sorry, I couldn't connect to Louis AI's AI server.";
+
     }
-]
-        })
-    });
 
-    const data = await response.json();
-
-    if(!response.ok){
-        return "API Error: " + (data.error?.message || "Unknown error");
-    }
-
-    return data.choices[0].message.content;
 }
 async function loadKnowledge() {
 
@@ -176,11 +183,7 @@ if(conversation.length > 20){
 
 localStorage.setItem("conversation", JSON.stringify(conversation));
 
-if (OPENAI_API_KEY.trim() !== "") {
-    reply = await getAIResponse(userText);
-} else {
-    reply = getReply(userText);
-}
+reply = await getAIResponse(userText);
 conversation.push("You: " + userText);
 localStorage.setItem("conversation", JSON.stringify(conversation));
 
