@@ -16,6 +16,12 @@ export default async function handler(req, res) {
             });
         }
 
+        if (!process.env.OPENAI_API_KEY) {
+            return res.status(500).json({
+                error: "OPENAI_API_KEY is missing from Vercel environment variables."
+            });
+        }
+
         const response = await fetch(
             "https://api.openai.com/v1/responses",
             {
@@ -28,12 +34,7 @@ export default async function handler(req, res) {
 
                 body: JSON.stringify({
                     model: "gpt-4.1-mini",
-                    input: [
-                        {
-                            role: "user",
-                            content: message
-                        }
-                    ]
+                    input: message
                 })
             }
         );
@@ -42,19 +43,20 @@ export default async function handler(req, res) {
 
         if (!response.ok) {
             return res.status(response.status).json({
-                error: data.error?.message || "AI request failed"
+                error: data.error?.message || "OpenAI request failed"
             });
         }
 
         return res.status(200).json({
-            reply: data.output_text
+            reply: data.output_text || "OpenAI returned no text."
         });
 
     } catch (error) {
 
-        return res.status(500).json({
-            error: "Server error"
-        });
+        console.error("API ERROR:", error);
 
+        return res.status(500).json({
+            error: error.message || "Server error"
+        });
     }
 }
