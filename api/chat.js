@@ -18,7 +18,7 @@ export default async function handler(req, res) {
 
         if (!process.env.OPENAI_API_KEY) {
             return res.status(500).json({
-                error: "OPENAI_API_KEY is missing from Vercel environment variables."
+                error: "OPENAI_API_KEY is missing."
             });
         }
 
@@ -47,8 +47,35 @@ export default async function handler(req, res) {
             });
         }
 
+        // Get the text from the Responses API output
+        let reply = "";
+
+        if (data.output) {
+
+            for (const item of data.output) {
+
+                if (item.content) {
+
+                    for (const content of item.content) {
+
+                        if (content.type === "output_text" && content.text) {
+                            reply += content.text;
+                        }
+
+                    }
+                }
+            }
+        }
+
+        if (!reply) {
+            return res.status(500).json({
+                error: "OpenAI returned no text.",
+                response: data
+            });
+        }
+
         return res.status(200).json({
-            reply: data.output_text || "OpenAI returned no text."
+            reply: reply
         });
 
     } catch (error) {
