@@ -195,87 +195,143 @@ async function loadKnowledge() {
 }
 async function sendMessage(){
 
-    let input = document.getElementById("userInput");
-    let userText = input.value.trim();
-conversation.push({
-    sender: "user",
-    message: userText
-});
+    const input = document.getElementById("userInput");
+    const chat = document.getElementById("chat");
 
-if(conversation.length > 20){
-    conversation.shift();
-}
+    const userText = input.value.trim();
 
-localStorage.setItem("conversation", JSON.stringify(conversation));
-    if(userText === "") return;
+    if(userText === ""){
+        return;
+    }
 
-    let chat = document.getElementById("chat");
-
-chat.innerHTML += "<div class='user-message'>" + userText + "</div>";
-chatMemory.push({
-    role: "user",
-    message: userText
-});
-
-if (chatMemory.length > 20) {
-    chatMemory.shift();
-}
-
-localStorage.setItem("chatMemory", JSON.stringify(chatMemory));
-localStorage.setItem("conversation", JSON.stringify(conversation));
-
-    // Remember the last user message
-    lastUserMessage = userText;
-
-let reply;
-conversation.push({
-    sender: "ai",
-    message: reply
-});
-
-if(conversation.length > 20){
-    conversation.shift();
-}
-
-localStorage.setItem("conversation", JSON.stringify(conversation));
-
-reply = await getAIResponse(userText, chatMemory.slice(0, -1));
-conversation.push("You: " + userText);
-localStorage.setItem("conversation", JSON.stringify(conversation));
-
-// Show typing message
-chat.innerHTML += "<p id='typing'><b>Louis AI:</b> Typing...</p>";
-chat.scrollTop = chat.scrollHeight;
-
-setTimeout(function(){
-
- let typing = document.getElementById("typing");
-if(typing){
-    typing.remove();
-}
-    // Remember the last AI reply
-    lastAIMessage = reply;
-chat.innerHTML += "<div class='ai-message'>" + reply.replace(/\n/g, "<br>") + "</div>";
-let speech = new SpeechSynthesisUtterance(reply);
-speechSynthesis.speak(speech);
-conversation.push("Louis AI: " + reply);
-chatMemory.push({
-    role: "assistant",
-    message: reply
-});
-
-if (chatMemory.length > 20) {
-    chatMemory.shift();
-}
-
-localStorage.setItem("chatMemory", JSON.stringify(chatMemory));
-localStorage.setItem("conversation", JSON.stringify(conversation));
+    // Show user's message
+    chat.innerHTML += `
+        <div class="user-message">
+            ${userText}
+        </div>
+    `;
 
     chat.scrollTop = chat.scrollHeight;
 
-}, 1000);
+    // Remember user message
+    lastUserMessage = userText;
 
-input.value = "";
+    chatMemory.push({
+        role: "user",
+        message: userText
+    });
+
+    if(chatMemory.length > 20){
+        chatMemory.shift();
+    }
+
+    localStorage.setItem(
+        "chatMemory",
+        JSON.stringify(chatMemory)
+    );
+
+    conversation.push({
+        sender: "user",
+        message: userText
+    });
+
+    if(conversation.length > 20){
+        conversation.shift();
+    }
+
+    localStorage.setItem(
+        "conversation",
+        JSON.stringify(conversation)
+    );
+
+    // Clear input
+    input.value = "";
+
+    // Show typing message
+    chat.innerHTML += `
+        <div id="typing">
+            <b>Louis AI is thinking...</b>
+        </div>
+    `;
+
+    chat.scrollTop = chat.scrollHeight;
+
+    try{
+
+        // Ask the Vercel API
+        const reply = await getAIResponse(userText);
+
+        // Remove typing message
+        const typing = document.getElementById("typing");
+
+        if(typing){
+            typing.remove();
+        }
+
+        // Remember AI reply
+        lastAIMessage = reply;
+
+        chatMemory.push({
+            role: "assistant",
+            message: reply
+        });
+
+        if(chatMemory.length > 20){
+            chatMemory.shift();
+        }
+
+        localStorage.setItem(
+            "chatMemory",
+            JSON.stringify(chatMemory)
+        );
+
+        conversation.push({
+            sender: "ai",
+            message: reply
+        });
+
+        if(conversation.length > 20){
+            conversation.shift();
+        }
+
+        localStorage.setItem(
+            "conversation",
+            JSON.stringify(conversation)
+        );
+
+        // Show Louis AI reply
+        chat.innerHTML += `
+            <div class="ai-message">
+                ${reply}
+            </div>
+        `;
+
+        chat.scrollTop = chat.scrollHeight;
+
+        // Speak the reply
+        const speech = new SpeechSynthesisUtterance(reply);
+        speechSynthesis.speak(speech);
+
+    }catch(error){
+
+        // Remove typing message
+        const typing = document.getElementById("typing");
+
+        if(typing){
+            typing.remove();
+        }
+
+        console.error("Louis AI Error:", error);
+
+        chat.innerHTML += `
+            <div class="ai-message">
+                Sorry, I couldn't connect to Louis AI right now.
+                Please try again.
+            </div>
+        `;
+
+        chat.scrollTop = chat.scrollHeight;
+    }
 }
 function handleGreeting(){
 
