@@ -86,7 +86,51 @@ function detectIntent(text){
 
     return "chat";
 }
+function getSavedMemory(){
+
+    let memory = [];
+
+    let userName = localStorage.getItem("userName");
+    let favoriteColor = localStorage.getItem("favoriteColor");
+    let favoriteFood = localStorage.getItem("favoriteFood");
+    let birthday = localStorage.getItem("birthday");
+    let hobby = localStorage.getItem("hobby");
+    let userCity = localStorage.getItem("userCity");
+    let favoriteAnimal = localStorage.getItem("favoriteAnimal");
+
+    if(userName){
+        memory.push("User's name: " + userName);
+    }
+
+    if(favoriteColor){
+        memory.push("User's favourite color: " + favoriteColor);
+    }
+
+    if(favoriteFood){
+        memory.push("User's favourite food: " + favoriteFood);
+    }
+
+    if(birthday){
+        memory.push("User's birthday: " + birthday);
+    }
+
+    if(hobby){
+        memory.push("User's hobby: " + hobby);
+    }
+
+    if(userCity){
+        memory.push("User lives in: " + userCity);
+    }
+
+    if(favoriteAnimal){
+        memory.push("User's favourite animal: " + favoriteAnimal);
+    }
+
+    return memory.join("\n");
+}
 async function getAIResponse(message, history){
+
+    const memory = getSavedMemory();
 
     const response = await fetch("/api/chat", {
         method: "POST",
@@ -95,10 +139,11 @@ async function getAIResponse(message, history){
             "Content-Type": "application/json"
         },
 
-        body: JSON.stringify({
-            message: message,
-            history: history
-        })
+body: JSON.stringify({
+    message: message,
+    history: history,
+    memory: memory
+})
     });
 
     const data = await response.json();
