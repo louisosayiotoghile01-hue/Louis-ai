@@ -27,7 +27,6 @@ module.exports = async function handler(req, res) {
 
         const input = [
             {
-                {
     role: "developer",
     content: `
 You are Louis AI, a helpful and intelligent personal AI assistant.
