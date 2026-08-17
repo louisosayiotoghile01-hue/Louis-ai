@@ -86,40 +86,28 @@ function detectIntent(text){
 
     return "chat";
 }
-async function getAIResponse(message){
+async function getAIResponse(message, history){
 
-    try {
+    const response = await fetch("/api/chat", {
+        method: "POST",
 
-        const response = await fetch("/api/chat", {
+        headers: {
+            "Content-Type": "application/json"
+        },
 
-            method: "POST",
+        body: JSON.stringify({
+            message: message,
+            history: history
+        })
+    });
 
-            headers: {
-                "Content-Type": "application/json"
-            },
+    const data = await response.json();
 
-            body: JSON.stringify({
-                message: message
-            })
-
-        });
-
-        const data = await response.json();
-
-        if(!response.ok){
-            return "API Error: " + (data.error || "Something went wrong.");
-        }
-
-        return data.reply || "I didn't receive a reply.";
-
-    } catch(error) {
-
-        console.error("API connection error:", error);
-
-        return "Sorry, I couldn't connect to Louis AI's AI server.";
-
+    if(!response.ok){
+        throw new Error(data.error || "API request failed");
     }
 
+    return data.reply;
 }
 async function loadKnowledge() {
 
