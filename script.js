@@ -8,6 +8,8 @@ let learnedFacts = JSON.parse(localStorage.getItem("learnedFacts")) || {};
 let notes = JSON.parse(localStorage.getItem("notes")) || [];
 let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
 let chatMemory = JSON.parse(localStorage.getItem("chatMemory")) || [];
+let personalMemory =
+    JSON.parse(localStorage.getItem("personalMemory")) || {};
 const synonyms = {
     "js": "javascript",
     "artificial intelligence": "ai",
