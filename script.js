@@ -128,9 +128,7 @@ function getSavedMemory(){
 
     return memory.join("\n");
 }
-async function getAIResponse(message, history){
-
-    const memory = getSavedMemory();
+async function getAIResponse(message){
 
     const response = await fetch("/api/chat", {
         method: "POST",
@@ -139,11 +137,10 @@ async function getAIResponse(message, history){
             "Content-Type": "application/json"
         },
 
-body: JSON.stringify({
-    message: message,
-    history: history,
-    memory: memory
-})
+        body: JSON.stringify({
+            message: message,
+            history: chatMemory
+        })
     });
 
     const data = await response.json();
