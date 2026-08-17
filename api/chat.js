@@ -8,7 +8,7 @@ export default async function handler(req, res) {
 
     try {
 
-        const { message, history } = req.body;
+        const { message, history, memory } = req.body;
 
         if (!message) {
             return res.status(400).json({
@@ -20,21 +20,60 @@ export default async function handler(req, res) {
             ? history.slice(-10)
             : [];
 
+        const personalMemory =
+            memory && typeof memory === "object"
+                ? memory
+                : {};
+
         const input = [
-            ...conversation.map(item => ({
-                role: item.role === "assistant" ? "assistant" : "user",
-                content: item.message
-            }))
+            {
+                role: "developer",
+                content:
+                    "You are Louis AI, a personal AI assistant. " +
+                    "Use the user's saved personal memory and recent conversation " +
+                    "to give helpful, natural answers. " +
+                    "Do not invent personal information that is not provided."
+            }
         ];
+
+        if (Object.keys(personalMemory).length > 0) {
+
+            input.push({
+                role: "developer",
+                content:
+                    "Saved personal memory about the user:\n" +
+                    JSON.stringify(personalMemory)
+            });
+
+        }
+
+        for (const item of conversation) {
+
+            if (!item || !item.message) {
+                continue;
+            }
+
+            input.push({
+                role:
+                    item.role === "assistant"
+                        ? "assistant"
+                        : "user",
+
+                content: item.message
+            });
+
+        }
 
         if (
             input.length === 0 ||
             input[input.length - 1].content !== message
         ) {
+
             input.push({
                 role: "user",
                 content: message
             });
+
         }
 
         const response = await fetch(
@@ -58,11 +97,13 @@ export default async function handler(req, res) {
         const data = await response.json();
 
         if (!response.ok) {
+
             return res.status(response.status).json({
                 error:
                     data.error?.message ||
                     "AI request failed"
             });
+
         }
 
         let reply = data.output_text;
@@ -82,17 +123,22 @@ export default async function handler(req, res) {
                             reply = content.text;
                             break;
                         }
+
                     }
+
                 }
 
                 if (reply) break;
             }
+
         }
 
         if (!reply) {
+
             return res.status(500).json({
                 error: "OpenAI returned no text response."
             });
+
         }
 
         return res.status(200).json({
@@ -106,5 +152,6 @@ export default async function handler(req, res) {
         return res.status(500).json({
             error: "Server error"
         });
+
     }
 }
