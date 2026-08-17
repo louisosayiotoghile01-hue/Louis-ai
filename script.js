@@ -171,7 +171,7 @@ if(conversation.length > 20){
 
 localStorage.setItem("conversation", JSON.stringify(conversation));
 
-reply = await getAIResponse(userText);
+reply = await getAIResponse(userText, chatMemory.slice(0, -1));
 conversation.push("You: " + userText);
 localStorage.setItem("conversation", JSON.stringify(conversation));
 
