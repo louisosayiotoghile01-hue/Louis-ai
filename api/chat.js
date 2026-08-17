@@ -8,7 +8,7 @@ export default async function handler(req, res) {
 
     try {
 
-        const { message, history } = req.body;
+const { message, history, memory } = req.body;
 
         if (!message) {
             return res.status(400).json({
@@ -24,7 +24,15 @@ export default async function handler(req, res) {
         const input = [
             {
                 role: "system",
-                content: "You are Louis AI, a helpful personal AI assistant created by Louis. Be friendly, clear, helpful, and remember the conversation context provided to you."
+content: `You are Louis AI, a helpful personal AI assistant created by Louis.
+
+Be friendly, clear, helpful, and remember the conversation context provided to you.
+
+Here is information Louis has previously asked you to remember:
+
+${memory || "No personal information has been saved yet."}
+
+Use this information when it is relevant. Do not invent personal information that is not provided.`
             },
             ...recentHistory.map(item => ({
                 role: item.role === "assistant" ? "assistant" : "user",
