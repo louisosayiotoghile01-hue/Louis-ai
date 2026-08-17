@@ -162,10 +162,11 @@ async function getAIResponse(message){
             "Content-Type": "application/json"
         },
 
-        body: JSON.stringify({
-            message: message,
-            history: chatMemory
-        })
+body: JSON.stringify({
+    message: message,
+    history: chatMemory,
+    memory: getAllPersonalMemory()
+})
     });
 
     const data = await response.json();
