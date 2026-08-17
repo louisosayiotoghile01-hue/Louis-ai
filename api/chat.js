@@ -61,9 +61,34 @@ export default async function handler(req, res) {
             });
         }
 
-        return res.status(200).json({
-            reply: data.output_text || "I didn't receive a text response."
-        });
+let reply = "";
+
+if (data.output_text) {
+    reply = data.output_text;
+} else if (data.output) {
+
+    for (const item of data.output) {
+
+        if (item.type === "message" && item.content) {
+
+            for (const content of item.content) {
+
+                if (content.type === "output_text") {
+                    reply += content.text;
+                }
+
+            }
+        }
+    }
+}
+
+if (!reply) {
+    reply = "I didn't receive a text response.";
+}
+
+return res.status(200).json({
+    reply: reply
+});
 
     } catch (error) {
 
