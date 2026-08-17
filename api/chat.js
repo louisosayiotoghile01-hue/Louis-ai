@@ -8,7 +8,7 @@ export default async function handler(req, res) {
 
     try {
 
-const { message, history, memory } = req.body;
+        const { message, history } = req.body;
 
         if (!message) {
             return res.status(400).json({
@@ -16,27 +16,14 @@ const { message, history, memory } = req.body;
             });
         }
 
-        // Keep only the most recent 10 messages
-        const recentHistory = Array.isArray(history)
+        const conversation = Array.isArray(history)
             ? history.slice(-10)
             : [];
 
         const input = [
-            {
-                role: "system",
-content: `You are Louis AI, a helpful personal AI assistant created by Louis.
-
-Be friendly, clear, helpful, and remember the conversation context provided to you.
-
-Here is information Louis has previously asked you to remember:
-
-${memory || "No personal information has been saved yet."}
-
-Use this information when it is relevant. Do not invent personal information that is not provided.`
-            },
-            ...recentHistory.map(item => ({
+            ...conversation.map(item => ({
                 role: item.role === "assistant" ? "assistant" : "user",
-                content: String(item.message || "")
+                content: item.message
             })),
             {
                 role: "user",
@@ -51,7 +38,8 @@ Use this information when it is relevant. Do not invent personal information tha
 
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": "Bearer " + process.env.OPENAI_API_KEY
+                    "Authorization":
+                        "Bearer " + process.env.OPENAI_API_KEY
                 },
 
                 body: JSON.stringify({
@@ -65,38 +53,15 @@ Use this information when it is relevant. Do not invent personal information tha
 
         if (!response.ok) {
             return res.status(response.status).json({
-                error: data.error?.message || "AI request failed"
+                error:
+                    data.error?.message ||
+                    "AI request failed"
             });
         }
 
-let reply = "";
-
-if (data.output_text) {
-    reply = data.output_text;
-} else if (data.output) {
-
-    for (const item of data.output) {
-
-        if (item.type === "message" && item.content) {
-
-            for (const content of item.content) {
-
-                if (content.type === "output_text") {
-                    reply += content.text;
-                }
-
-            }
-        }
-    }
-}
-
-if (!reply) {
-    reply = "I didn't receive a text response.";
-}
-
-return res.status(200).json({
-    reply: reply
-});
+        return res.status(200).json({
+            reply: data.output_text || "I didn't receive a text response."
+        });
 
     } catch (error) {
 
