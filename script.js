@@ -10,6 +10,29 @@ let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
 let chatMemory = JSON.parse(localStorage.getItem("chatMemory")) || [];
 let personalMemory =
     JSON.parse(localStorage.getItem("personalMemory")) || {};
+function savePersonalMemory(key, value){
+
+    personalMemory[key] = value;
+
+    localStorage.setItem(
+        "personalMemory",
+        JSON.stringify(personalMemory)
+    );
+}
+
+
+function getPersonalMemory(key){
+
+    return personalMemory[key] || null;
+
+}
+
+
+function getAllPersonalMemory(){
+
+    return personalMemory;
+
+}
 const synonyms = {
     "js": "javascript",
     "artificial intelligence": "ai",
