@@ -24,12 +24,18 @@ export default async function handler(req, res) {
             ...conversation.map(item => ({
                 role: item.role === "assistant" ? "assistant" : "user",
                 content: item.message
-            })),
-            {
+            }))
+        ];
+
+        if (
+            input.length === 0 ||
+            input[input.length - 1].content !== message
+        ) {
+            input.push({
                 role: "user",
                 content: message
-            }
-        ];
+            });
+        }
 
         const response = await fetch(
             "https://api.openai.com/v1/responses",
@@ -59,17 +65,46 @@ export default async function handler(req, res) {
             });
         }
 
+        let reply = data.output_text;
+
+        if (!reply && data.output) {
+
+            for (const item of data.output) {
+
+                if (item.content) {
+
+                    for (const content of item.content) {
+
+                        if (
+                            content.type === "output_text" &&
+                            content.text
+                        ) {
+                            reply = content.text;
+                            break;
+                        }
+                    }
+                }
+
+                if (reply) break;
+            }
+        }
+
+        if (!reply) {
+            return res.status(500).json({
+                error: "OpenAI returned no text response."
+            });
+        }
+
         return res.status(200).json({
-            reply: data.output_text || "I didn't receive a text response."
+            reply: reply
         });
 
     } catch (error) {
 
-        console.error(error);
+        console.error("API ERROR:", error);
 
         return res.status(500).json({
             error: "Server error"
         });
-
     }
 }
