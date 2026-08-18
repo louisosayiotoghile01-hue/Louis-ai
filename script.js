@@ -251,13 +251,22 @@ if(userText.toLowerCase().startsWith("remember that ")){
 }
     if(userText === "") return;
 
-    // Remember user message
-    lastUserMessage = userText;
+// Show user's message
+chat.innerHTML += `
+    <div class="user-message">
+        ${userText}
+    </div>
+`;
 
-    chatMemory.push({
-        role: "user",
-        message: userText
-    });
+chat.scrollTop = chat.scrollHeight;
+
+// Remember user message
+lastUserMessage = userText;
+
+chatMemory.push({
+    role: "user",
+    message: userText
+});
 
     if(chatMemory.length > 20){
         chatMemory.shift();
