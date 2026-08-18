@@ -325,6 +325,34 @@ if(
         return;
     }
 }
+    // FAVORITE FOOD MEMORY
+
+if(
+    lowerText.includes("what is my favorite food") ||
+    lowerText.includes("what is my favourite food")
+){
+
+    const memories = getAllPersonalMemory();
+
+    let food =
+        memories.favoriteFood ||
+        memories.favouriteFood ||
+        memories["favorite food"] ||
+        memories["favourite food"];
+
+    if(food){
+
+        chat.innerHTML += `
+            <div class="ai-message">
+                Your favorite food is ${food}. 🍽️
+            </div>
+        `;
+
+        chat.scrollTop = chat.scrollHeight;
+
+        return;
+    }
+}
     // Show typing message
     chat.innerHTML += `
         <div id="typing">
