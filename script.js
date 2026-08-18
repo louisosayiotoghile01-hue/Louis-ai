@@ -232,15 +232,31 @@ if(userText.toLowerCase().startsWith("remember that ")){
 
     const memoryText = userText.substring(14).trim();
 
-    if(memoryText){
+if(memoryText){
 
-        const memoryReply = saveLongTermMemory(memoryText);
+    // Show user's memory message
+    chat.innerHTML += `
+        <div class="user-message">
+            ${userText}
+        </div>
+    `;
 
-        chat.innerHTML += `
-            <div class="ai-message">
-                ${memoryReply}
-            </div>
-        `;
+    // Save the memory
+    const memoryReply = saveLongTermMemory(memoryText);
+
+    // Show Louis AI's reply
+    chat.innerHTML += `
+        <div class="ai-message">
+            ${memoryReply}
+        </div>
+    `;
+
+    chat.scrollTop = chat.scrollHeight;
+
+    input.value = "";
+
+    return;
+}
 
         chat.scrollTop = chat.scrollHeight;
 
