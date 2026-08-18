@@ -471,7 +471,46 @@ if(
 // DIRECT PERSONAL MEMORY ANSWERS
 
 const lowerText = userText.toLowerCase();
+// FAVOURITE COLOUR MEMORY
 
+if(
+    lowerText.includes("what is my favourite colour") ||
+    lowerText.includes("what is my favorite color") ||
+    lowerText.includes("what is my favourite color") ||
+    lowerText.includes("what is my favorite colour") ||
+    lowerText.includes("what's my favourite colour") ||
+    lowerText.includes("what's my favorite color")
+){
+
+    const memories = getAllPersonalMemory();
+
+    const color =
+        memories.favoriteColor ||
+        memories.favouriteColor ||
+        memories["favorite_color"] ||
+        memories["favourite_color"];
+
+    if(color){
+
+        chat.innerHTML += `
+            <div class="ai-message">
+                Your favourite colour is ${color}. 🎨
+            </div>
+        `;
+
+    }else{
+
+        chat.innerHTML += `
+            <div class="ai-message">
+                I don't have your favourite colour saved yet. 🎨
+            </div>
+        `;
+    }
+
+    chat.scrollTop = chat.scrollHeight;
+
+    return;
+            }
 if(
     lowerText.includes("what is my favorite color") ||
     lowerText.includes("what is my favourite color")
