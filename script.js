@@ -251,17 +251,6 @@ if(userText.toLowerCase().startsWith("remember that ")){
 }
     if(userText === "") return;
 
-let chat = document.getElementById("chat");
-
-// Show the user's message immediately
-chat.innerHTML += "<div class='user-message'>" + userText + "</div>";
-chat.scrollTop = chat.scrollHeight;
-
-chatMemory.push({
-    role: "user",
-    message: userText
-});
-
     // Remember user message
     lastUserMessage = userText;
 
