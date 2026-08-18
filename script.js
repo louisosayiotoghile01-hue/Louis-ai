@@ -353,6 +353,54 @@ if(
         return;
     }
 }
+    // BIRTHDAY MEMORY
+
+if(
+    lowerText.includes("my birthday is") ||
+    lowerText.includes("remember that my birthday is") ||
+    lowerText.includes("i was born on")
+){
+
+    let birthday = "";
+
+    if(lowerText.includes("my birthday is")){
+        birthday = text.substring(
+            text.toLowerCase().indexOf("my birthday is") + 14
+        ).trim();
+    }
+
+    else if(lowerText.includes("remember that my birthday is")){
+        birthday = text.substring(
+            text.toLowerCase().indexOf("remember that my birthday is") + 27
+        ).trim();
+    }
+
+    else if(lowerText.includes("i was born on")){
+        birthday = text.substring(
+            text.toLowerCase().indexOf("i was born on") + 13
+        ).trim();
+    }
+
+    if(birthday){
+
+        personalMemory.birthday = birthday;
+
+        localStorage.setItem(
+            "personalMemory",
+            JSON.stringify(personalMemory)
+        );
+
+        chat.innerHTML += `
+            <div class="ai-message">
+                I'll remember your birthday is ${birthday}. 🎂
+            </div>
+        `;
+
+        chat.scrollTop = chat.scrollHeight;
+
+        return;
+    }
+}
     // NAME MEMORY
 
 if(
