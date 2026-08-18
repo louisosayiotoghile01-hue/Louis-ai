@@ -353,6 +353,34 @@ if(
         return;
     }
 }
+    // NAME MEMORY
+
+if(
+    lowerText.includes("what is my name") ||
+    lowerText.includes("what's my name")
+){
+
+    const memories = getAllPersonalMemory();
+
+    let name =
+        memories.name ||
+        memories.userName ||
+        memories["name"] ||
+        localStorage.getItem("userName");
+
+    if(name){
+
+        chat.innerHTML += `
+            <div class="ai-message">
+                Your name is ${name}. 👋
+            </div>
+        `;
+
+        chat.scrollTop = chat.scrollHeight;
+
+        return;
+    }
+}
     // Show typing message
     chat.innerHTML += `
         <div id="typing">
