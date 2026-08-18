@@ -165,7 +165,10 @@ async function getAIResponse(message){
 body: JSON.stringify({
     message: message,
     history: chatMemory,
-    memory: getAllPersonalMemory()
+    memory: {
+    personal: getAllPersonalMemory(),
+    longTerm: getLongTermMemory()
+}
 })
     });
 
@@ -193,13 +196,59 @@ async function loadKnowledge() {
     }
 
 }
+function saveLongTermMemory(text){
+
+    let memories =
+        JSON.parse(localStorage.getItem("longTermMemory")) || [];
+
+    memories.push({
+        memory: text,
+        date: new Date().toISOString()
+    });
+
+    localStorage.setItem(
+        "longTermMemory",
+        JSON.stringify(memories)
+    );
+
+    return "I'll remember that.";
+}
+
+
+function getLongTermMemory(){
+
+    return JSON.parse(
+        localStorage.getItem("longTermMemory")
+    ) || [];
+}
 async function sendMessage(){
 
     const input = document.getElementById("userInput");
     const chat = document.getElementById("chat");
 
     const userText = input.value.trim();
+// Long-term memory command
+if(userText.toLowerCase().startsWith("remember that ")){
 
+    const memoryText = userText.substring(14).trim();
+
+    if(memoryText){
+
+        const memoryReply = saveLongTermMemory(memoryText);
+
+        chat.innerHTML += `
+            <div class="ai-message">
+                ${memoryReply}
+            </div>
+        `;
+
+        chat.scrollTop = chat.scrollHeight;
+
+        input.value = "";
+
+        return;
+    }
+}
     if(userText === ""){
         return;
     }
