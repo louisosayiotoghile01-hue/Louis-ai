@@ -390,55 +390,48 @@ if(
         memoryValue = memoryContent.substring(10).trim();
     }
 // UNIVERSAL PERSONAL MEMORY
-// Handles memories that are not one of the predefined categories
 
 if(!memoryKey && !memoryValue){
 
     const genericMemory = memoryContent.trim();
 
-    const isGenericMemory =
-        genericMemory.includes(" is ") ||
-        genericMemory.includes(" are ") ||
-        genericMemory.includes(" likes ") ||
-        genericMemory.includes(" loves ") ||
-        genericMemory.includes(" supports ") ||
-        genericMemory.includes(" prefers ");
+    const separators = [
+        " is ",
+        " are ",
+        " likes ",
+        " loves ",
+        " supports ",
+        " prefers "
+    ];
 
-    if(isGenericMemory){
+    let foundSeparator = null;
 
-        let separator = "";
+    for(let separator of separators){
 
-        if(genericMemory.includes(" is ")){
-            separator = " is ";
+        if(genericMemory.toLowerCase().includes(separator)){
+            foundSeparator = separator;
+            break;
         }
-        else if(genericMemory.includes(" are ")){
-            separator = " are ";
-        }
-        else if(genericMemory.includes(" likes ")){
-            separator = " likes ";
-        }
-        else if(genericMemory.includes(" loves ")){
-            separator = " loves ";
-        }
-        else if(genericMemory.includes(" supports ")){
-            separator = " supports ";
-        }
-        else if(genericMemory.includes(" prefers ")){
-            separator = " prefers ";
-        }
+    }
 
-        if(separator){
+    if(foundSeparator){
 
-            const parts = genericMemory.split(separator);
+        const position = genericMemory
+            .toLowerCase()
+            .indexOf(foundSeparator);
 
-            const key = parts[0].trim();
-            const value = parts.slice(1).join(separator).trim();
+        const key = genericMemory
+            .substring(0, position)
+            .trim();
 
-            if(key && value){
+        const value = genericMemory
+            .substring(position + foundSeparator.length)
+            .trim();
 
-                memoryKey = key;
-                memoryValue = value;
-            }
+        if(key && value){
+
+            memoryKey = key;
+            memoryValue = value;
         }
     }
 }
