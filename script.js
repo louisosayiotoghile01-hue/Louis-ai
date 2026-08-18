@@ -866,19 +866,61 @@ if(
 
     }catch(error){
 
-        const typing = document.getElementById("typing");
+    const typing = document.getElementById("typing");
 
-        if(typing){
-            typing.remove();
-        }
+    if(typing){
+        typing.remove();
+    }
 
-        chat.innerHTML += `
-            <div class="ai-message">
-                Sorry, I couldn't connect to Louis AI right now.
-            </div>
-        `;
+    console.error("Louis AI API error:", error);
 
-        console.error("Louis AI error:", error);
+    // Use Louis AI's local brain if the API is unavailable
+    const localReply = getReply(userText);
+
+    lastAIMessage = localReply;
+
+    chat.innerHTML += `
+        <div class="ai-message">
+            ${localReply}
+        </div>
+    `;
+
+    chat.scrollTop = chat.scrollHeight;
+
+    // Save local reply to memory
+    chatMemory.push({
+        role: "assistant",
+        message: localReply
+    });
+
+    if(chatMemory.length > 20){
+        chatMemory.shift();
+    }
+
+    localStorage.setItem(
+        "chatMemory",
+        JSON.stringify(chatMemory)
+    );
+
+    conversation.push({
+        sender: "ai",
+        message: localReply
+    });
+
+    if(conversation.length > 20){
+        conversation.shift();
+    }
+
+    localStorage.setItem(
+        "conversation",
+        JSON.stringify(conversation)
+    );
+
+    // Speak the local reply
+    if(typeof speechSynthesis !== "undefined"){
+        const speech = new SpeechSynthesisUtterance(localReply);
+        speechSynthesis.speak(speech);
+    }
     }
 
     chat.scrollTop = chat.scrollHeight;
