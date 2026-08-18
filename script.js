@@ -274,6 +274,113 @@ async function sendMessage(){
 
     // Clear input
     input.value = "";
+// UNIVERSAL REMEMBER THAT MEMORY
+
+const rememberText = userText.trim();
+const rememberLower = rememberText.toLowerCase();
+
+if(rememberLower.startsWith("remember that ")){
+
+    const memoryContent = rememberText.substring(14).trim();
+
+    const memoryLower = memoryContent.toLowerCase();
+
+    let memoryKey = "";
+    let memoryValue = "";
+
+    // BIRTHDAY
+    if(memoryLower.startsWith("my birthday is ")){
+
+        memoryKey = "birthday";
+
+        memoryValue = memoryContent.substring(15).trim();
+    }
+
+    // NAME
+    else if(memoryLower.startsWith("my name is ")){
+
+        memoryKey = "name";
+
+        memoryValue = memoryContent.substring(11).trim();
+    }
+
+    // FAVOURITE FOOD
+    else if(
+        memoryLower.startsWith("my favourite food is ") ||
+        memoryLower.startsWith("my favorite food is ")
+    ){
+
+        memoryKey = "favoriteFood";
+
+        let start = memoryLower.startsWith("my favourite food is ")
+            ? 21
+            : 20;
+
+        memoryValue = memoryContent.substring(start).trim();
+    }
+
+    // FAVOURITE COLOUR
+    else if(
+        memoryLower.startsWith("my favourite colour is ") ||
+        memoryLower.startsWith("my favorite color is ")
+    ){
+
+        memoryKey = "favoriteColor";
+
+        let start = memoryLower.startsWith("my favourite colour is ")
+            ? 23
+            : 22;
+
+        memoryValue = memoryContent.substring(start).trim();
+    }
+
+    // HOBBY
+    else if(memoryLower.startsWith("my hobby is ")){
+
+        memoryKey = "hobby";
+
+        memoryValue = memoryContent.substring(12).trim();
+    }
+
+    // FAVOURITE ANIMAL
+    else if(
+        memoryLower.startsWith("my favourite animal is ") ||
+        memoryLower.startsWith("my favorite animal is ")
+    ){
+
+        memoryKey = "favoriteAnimal";
+
+        let start = memoryLower.startsWith("my favourite animal is ")
+            ? 23
+            : 22;
+
+        memoryValue = memoryContent.substring(start).trim();
+    }
+
+    // LOCATION
+    else if(memoryLower.startsWith("i live in ")){
+
+        memoryKey = "location";
+
+        memoryValue = memoryContent.substring(10).trim();
+    }
+
+    // SAVE MEMORY
+    if(memoryKey && memoryValue){
+
+        savePersonalMemory(memoryKey, memoryValue);
+
+        chat.innerHTML += `
+            <div class="ai-message">
+                I'll remember that your ${memoryKey} is ${memoryValue}. 🧠
+            </div>
+        `;
+
+        chat.scrollTop = chat.scrollHeight;
+
+        return;
+    }
+}
 // BIRTHDAY MEMORY COMMAND
 
 const lowerUserText = userText.toLowerCase();
