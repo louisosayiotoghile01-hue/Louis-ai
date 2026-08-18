@@ -67,6 +67,21 @@ IMPORTANT CONVERSATION RULES:
 
 10. When information is uncertain, say so rather than making up facts.
 `
+                BIRTHDAY MEMORY:
+If the user tells you their birthday, remember it as a personal fact.
+Examples:
+- "My birthday is January 15"
+- "Remember that my birthday is January 15"
+- "I was born on January 15"
+
+If the user later asks:
+- "When is my birthday?"
+- "What is my birthday?"
+- "Do you remember my birthday?"
+
+Use the stored birthday from the memory provided to you.
+
+Never invent a birthday if one has not been provided.
                 }
         ];
 
