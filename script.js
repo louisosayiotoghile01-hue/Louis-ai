@@ -389,7 +389,59 @@ if(
 
         memoryValue = memoryContent.substring(10).trim();
     }
+// UNIVERSAL PERSONAL MEMORY
+// Handles memories that are not one of the predefined categories
 
+if(!memoryKey && !memoryValue){
+
+    const genericMemory = memoryContent.trim();
+
+    const isGenericMemory =
+        genericMemory.includes(" is ") ||
+        genericMemory.includes(" are ") ||
+        genericMemory.includes(" likes ") ||
+        genericMemory.includes(" loves ") ||
+        genericMemory.includes(" supports ") ||
+        genericMemory.includes(" prefers ");
+
+    if(isGenericMemory){
+
+        let separator = "";
+
+        if(genericMemory.includes(" is ")){
+            separator = " is ";
+        }
+        else if(genericMemory.includes(" are ")){
+            separator = " are ";
+        }
+        else if(genericMemory.includes(" likes ")){
+            separator = " likes ";
+        }
+        else if(genericMemory.includes(" loves ")){
+            separator = " loves ";
+        }
+        else if(genericMemory.includes(" supports ")){
+            separator = " supports ";
+        }
+        else if(genericMemory.includes(" prefers ")){
+            separator = " prefers ";
+        }
+
+        if(separator){
+
+            const parts = genericMemory.split(separator);
+
+            const key = parts[0].trim();
+            const value = parts.slice(1).join(separator).trim();
+
+            if(key && value){
+
+                memoryKey = key;
+                memoryValue = value;
+            }
+        }
+    }
+}
     // SAVE MEMORY
     if(memoryKey && memoryValue){
 
