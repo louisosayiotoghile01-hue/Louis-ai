@@ -228,9 +228,11 @@ async function sendMessage(){
 
     const userText = input.value.trim();
 
-    if(userText === ""){
-        return;
-    }
+if(userText === ""){
+    return;
+}
+
+const lowerText = userText.toLowerCase();
 
     // Show user's message immediately
     chat.innerHTML += `
@@ -466,8 +468,8 @@ if(
     if(lowerUserText.includes("my birthday is")){
 
         birthday = userText.substring(
-            lowerUserText.indexOf("my birthday is") + 14
-        ).trim();
+    lowerText.indexOf("my birthday is") + 14
+).trim();
 
     }
     else if(lowerUserText.includes("i was born on")){
@@ -562,8 +564,7 @@ if(
     return;
 }
 // DIRECT PERSONAL MEMORY ANSWERS
-
-const lowerText = userText.toLowerCase();
+    
 // FAVOURITE COLOUR MEMORY
 
 if(
