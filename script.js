@@ -274,7 +274,48 @@ async function sendMessage(){
 
     // Clear input
     input.value = "";
+// BIRTHDAY MEMORY COMMAND
 
+const lowerUserText = userText.toLowerCase();
+
+if(
+    lowerUserText.includes("my birthday is") ||
+    lowerUserText.includes("remember that my birthday is") ||
+    lowerUserText.includes("i was born on")
+){
+
+    let birthday = "";
+
+    if(lowerUserText.includes("my birthday is")){
+
+        birthday = userText.substring(
+            lowerUserText.indexOf("my birthday is") + 14
+        ).trim();
+
+    }
+    else if(lowerUserText.includes("i was born on")){
+
+        birthday = userText.substring(
+            lowerUserText.indexOf("i was born on") + 13
+        ).trim();
+
+    }
+
+    if(birthday){
+
+        savePersonalMemory("birthday", birthday);
+
+        chat.innerHTML += `
+            <div class="ai-message">
+                I'll remember your birthday is ${birthday}. 🎂
+            </div>
+        `;
+
+        chat.scrollTop = chat.scrollHeight;
+
+        return;
+    }
+                                  }
     // LONG-TERM MEMORY COMMAND
     if(userText.toLowerCase().startsWith("remember that ")){
 
