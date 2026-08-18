@@ -295,7 +295,36 @@ async function sendMessage(){
             return;
         }
     }
+// DIRECT PERSONAL MEMORY ANSWERS
 
+const lowerText = userText.toLowerCase();
+
+if(
+    lowerText.includes("what is my favorite color") ||
+    lowerText.includes("what is my favourite color")
+){
+
+    const memories = getAllPersonalMemory();
+
+    let color =
+        memories.favoriteColor ||
+        memories.favouriteColor ||
+        memories["favorite color"] ||
+        memories["favourite color"];
+
+    if(color){
+
+        chat.innerHTML += `
+            <div class="ai-message">
+                Your favorite color is ${color}. 💙
+            </div>
+        `;
+
+        chat.scrollTop = chat.scrollHeight;
+
+        return;
+    }
+}
     // Show typing message
     chat.innerHTML += `
         <div id="typing">
