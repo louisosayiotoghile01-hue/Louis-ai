@@ -468,6 +468,54 @@ if(
             return;
         }
     }
+    // GENERAL MEMORY RECALL
+
+if(
+    lowerText.includes("what do you remember about me") ||
+    lowerText.includes("what do you remember about me?") ||
+    lowerText.includes("what do you know about me") ||
+    lowerText.includes("show my memories") ||
+    lowerText.includes("show what you remember") ||
+    lowerText.includes("what have you remembered about me")
+){
+
+    const memories = getLongTermMemory();
+
+    if(memories.length === 0){
+
+        chat.innerHTML += `
+            <div class="ai-message">
+                I don't have any long-term memories about you yet. 🧠
+            </div>
+        `;
+
+    }else{
+
+        let memoryList = "";
+
+        memories.forEach((item, index) => {
+
+            memoryList += `
+                <div style="margin-bottom:10px;">
+                    ${index + 1}. ${item.memory}
+                </div>
+            `;
+
+        });
+
+        chat.innerHTML += `
+            <div class="ai-message">
+                <strong>Here's what I remember about you: 🧠</strong>
+                <br><br>
+                ${memoryList}
+            </div>
+        `;
+    }
+
+    chat.scrollTop = chat.scrollHeight;
+
+    return;
+}
 // DIRECT PERSONAL MEMORY ANSWERS
 
 const lowerText = userText.toLowerCase();
