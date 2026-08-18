@@ -227,62 +227,27 @@ async function sendMessage(){
     const chat = document.getElementById("chat");
 
     const userText = input.value.trim();
-// Long-term memory command
-if(userText.toLowerCase().startsWith("remember that ")){
 
-    const memoryText = userText.substring(14).trim();
+    if(userText === ""){
+        return;
+    }
 
-if(memoryText){
-
-    // Show user's memory message
+    // Show user's message immediately
     chat.innerHTML += `
         <div class="user-message">
             ${userText}
         </div>
     `;
 
-    // Save the memory
-    const memoryReply = saveLongTermMemory(memoryText);
-
-    // Show Louis AI's reply
-    chat.innerHTML += `
-        <div class="ai-message">
-            ${memoryReply}
-        </div>
-    `;
-
     chat.scrollTop = chat.scrollHeight;
 
-    input.value = "";
+    // Remember user's message
+    lastUserMessage = userText;
 
-    return;
-}
-
-        chat.scrollTop = chat.scrollHeight;
-
-        input.value = "";
-
-        return;
-    }
-}
-    if(userText === "") return;
-
-// Show user's message
-chat.innerHTML += `
-    <div class="user-message">
-        ${userText}
-    </div>
-`;
-
-chat.scrollTop = chat.scrollHeight;
-
-// Remember user message
-lastUserMessage = userText;
-
-chatMemory.push({
-    role: "user",
-    message: userText
-});
+    chatMemory.push({
+        role: "user",
+        message: userText
+    });
 
     if(chatMemory.length > 20){
         chatMemory.shift();
@@ -310,6 +275,27 @@ chatMemory.push({
     // Clear input
     input.value = "";
 
+    // LONG-TERM MEMORY COMMAND
+    if(userText.toLowerCase().startsWith("remember that ")){
+
+        const memoryText = userText.substring(15).trim();
+
+        if(memoryText !== ""){
+
+            saveLongTermMemory(memoryText);
+
+            chat.innerHTML += `
+                <div class="ai-message">
+                    I'll remember that.
+                </div>
+            `;
+
+            chat.scrollTop = chat.scrollHeight;
+
+            return;
+        }
+    }
+
     // Show typing message
     chat.innerHTML += `
         <div id="typing">
@@ -333,6 +319,14 @@ chatMemory.push({
 
         // Remember AI reply
         lastAIMessage = reply;
+
+        chat.innerHTML += `
+            <div class="ai-message">
+                ${reply}
+            </div>
+        `;
+
+        chat.scrollTop = chat.scrollHeight;
 
         chatMemory.push({
             role: "assistant",
@@ -362,39 +356,30 @@ chatMemory.push({
             JSON.stringify(conversation)
         );
 
-        // Show Louis AI reply
-        chat.innerHTML += `
-            <div class="ai-message">
-                ${reply}
-            </div>
-        `;
-
-        chat.scrollTop = chat.scrollHeight;
-
         // Speak the reply
-        const speech = new SpeechSynthesisUtterance(reply);
-        speechSynthesis.speak(speech);
+        if(typeof speechSynthesis !== "undefined"){
+            const speech = new SpeechSynthesisUtterance(reply);
+            speechSynthesis.speak(speech);
+        }
 
     }catch(error){
 
-        // Remove typing message
         const typing = document.getElementById("typing");
 
         if(typing){
             typing.remove();
         }
 
-        console.error("Louis AI Error:", error);
-
         chat.innerHTML += `
             <div class="ai-message">
                 Sorry, I couldn't connect to Louis AI right now.
-                Please try again.
             </div>
         `;
 
-        chat.scrollTop = chat.scrollHeight;
+        console.error("Louis AI error:", error);
     }
+
+    chat.scrollTop = chat.scrollHeight;
 }
 function handleGreeting(){
 
