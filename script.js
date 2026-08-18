@@ -389,7 +389,52 @@ if(
 
         memoryValue = memoryContent.substring(10).trim();
     }
+// UNIVERSAL PERSONAL MEMORY
 
+if(!memoryKey && !memoryValue){
+
+    const genericMemory = memoryContent.trim();
+
+    const separators = [
+        " is ",
+        " are ",
+        " likes ",
+        " loves ",
+        " supports ",
+        " prefers "
+    ];
+
+    let foundSeparator = null;
+
+    for(let separator of separators){
+
+        if(genericMemory.toLowerCase().includes(separator)){
+            foundSeparator = separator;
+            break;
+        }
+    }
+
+    if(foundSeparator){
+
+        const position = genericMemory
+            .toLowerCase()
+            .indexOf(foundSeparator);
+
+        const key = genericMemory
+            .substring(0, position)
+            .trim();
+
+        const value = genericMemory
+            .substring(position + foundSeparator.length)
+            .trim();
+
+        if(key && value){
+
+            memoryKey = key;
+            memoryValue = value;
+        }
+    }
+}
     // SAVE MEMORY
     if(memoryKey && memoryValue){
 
