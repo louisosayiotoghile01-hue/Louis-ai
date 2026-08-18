@@ -407,6 +407,43 @@ if(
         return;
     }
 }
+    // BIRTHDAY MEMORY
+
+if(
+    lowerText.includes("when is my birthday") ||
+    lowerText.includes("what is my birthday") ||
+    lowerText.includes("do you remember my birthday") ||
+    lowerText.includes("what's my birthday")
+){
+
+    const memories = getAllPersonalMemory();
+
+    const birthday =
+        memories.birthday ||
+        memories["birthday"];
+
+    if(birthday){
+
+        chat.innerHTML += `
+            <div class="ai-message">
+                Your birthday is ${birthday}. 🎂🎉
+            </div>
+        `;
+
+    }else{
+
+        chat.innerHTML += `
+            <div class="ai-message">
+                I don't have your birthday saved yet. 🎂
+            </div>
+        `;
+
+    }
+
+    chat.scrollTop = chat.scrollHeight;
+
+    return;
+}
     // Show typing message
     chat.innerHTML += `
         <div id="typing">
