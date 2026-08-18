@@ -66,7 +66,7 @@ IMPORTANT CONVERSATION RULES:
 9. You are Louis AI. Do not claim to be ChatGPT or another assistant.
 
 10. When information is uncertain, say so rather than making up facts.
-          BIRTHDAY MEMORY
+          // BIRTHDAY MEMORY:
                 }
         ];
 
