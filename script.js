@@ -381,6 +381,32 @@ if(
         return;
     }
 }
+    // HOBBY MEMORY
+
+if(
+    lowerText.includes("what is my hobby") ||
+    lowerText.includes("what's my hobby")
+){
+
+    const memories = getAllPersonalMemory();
+
+    let hobby =
+        memories.hobby ||
+        memories["hobby"];
+
+    if(hobby){
+
+        chat.innerHTML += `
+            <div class="ai-message">
+                Your hobby is ${hobby}. 🎯
+            </div>
+        `;
+
+        chat.scrollTop = chat.scrollHeight;
+
+        return;
+    }
+}
     // Show typing message
     chat.innerHTML += `
         <div id="typing">
