@@ -1785,6 +1785,25 @@ if(
         return "I'll remember that you support " + team + ".";
     }
 }
+    // NATURAL FOOTBALL TEAM MEMORY QUESTIONS
+
+if(
+    text.includes("what football team do i support") ||
+    text.includes("which football team do i support") ||
+    text.includes("what team do i support") ||
+    text.includes("which team do i support") ||
+    text.includes("what team do i love") ||
+    text.includes("which team do i love")
+){
+
+    let team = localStorage.getItem("favoriteFootballTeam");
+
+    if(team){
+        return "You support " + team + ".";
+    }else{
+        return "You haven't told me which football team you support yet.";
+    }
+            }
 let randomReplies = [
     "I'm not sure about that yet. You can teach me by typing: Learn: question = answer",
     "I don't know the answer yet, but I'm learning every day.",
