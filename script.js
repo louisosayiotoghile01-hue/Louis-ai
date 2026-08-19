@@ -521,13 +521,15 @@ if(
     }
 }
     // Show user's message immediately
-    chat.innerHTML += `
-        <div class="user-message">
-            ${userText}
-        </div>
-    `;
+const userMessageDiv = document.createElement("div");
 
-    chat.scrollTop = chat.scrollHeight;
+userMessageDiv.className = "user-message";
+
+userMessageDiv.textContent = userText;
+
+chat.appendChild(userMessageDiv);
+
+chat.scrollTop = chat.scrollHeight;
 
     // Remember user's message
     lastUserMessage = userText;
