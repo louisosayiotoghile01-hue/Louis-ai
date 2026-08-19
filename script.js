@@ -122,7 +122,8 @@ function getSavedMemory(){
     let hobby = localStorage.getItem("hobby");
     let userCity = localStorage.getItem("userCity");
     let favoriteAnimal = localStorage.getItem("favoriteAnimal");
-
+let favoriteFootballTeam =
+    localStorage.getItem("favoriteFootballTeam");
     if(userName){
         memory.push("User's name: " + userName);
     }
@@ -150,7 +151,12 @@ function getSavedMemory(){
     if(favoriteAnimal){
         memory.push("User's favourite animal: " + favoriteAnimal);
     }
-
+if(favoriteFootballTeam){
+    memory.push(
+        "User's favourite football team: " +
+        favoriteFootballTeam
+    );
+}
     return memory.join("\n");
 }
 async function getAIResponse(message){
@@ -1420,6 +1426,29 @@ if(text.includes("where do i live")){
         return "You haven't told me where you live yet.";
     }
 }
+    if(text.startsWith("my favourite football team is")){
+
+let team = userText.substring(29).trim();
+
+    localStorage.setItem(
+        "favoriteFootballTeam",
+        team
+    );
+
+    return "I'll remember that your favourite football team is " + team + ".";
+    }
+    if(text.includes("what is my favourite football team")){
+
+    let team = localStorage.getItem(
+        "favoriteFootballTeam"
+    );
+
+    if(team){
+        return "Your favourite football team is " + team + ".";
+    }else{
+        return "You haven't told me your favourite football team yet.";
+    }
+    }
 if(text.startsWith("my favourite animal is ")){
 
     let animal = userText.substring(24);
