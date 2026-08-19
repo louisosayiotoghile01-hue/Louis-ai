@@ -1748,6 +1748,43 @@ if(
            Object.keys(knowledge).length +
            " categories.";
 }
+    // NATURAL FOOTBALL TEAM MEMORY
+if(
+    text.startsWith("i support ") ||
+    text.startsWith("i love ") ||
+    text.startsWith("my team is ") ||
+    text.includes("i'm a ") && text.includes(" fan") ||
+    text.includes("i am a ") && text.includes(" fan")
+){
+
+    let team = "";
+
+    if(text.startsWith("i support ")){
+        team = userText.substring(10).trim();
+    }
+
+    else if(text.startsWith("i love ")){
+        team = userText.substring(7).trim();
+    }
+
+    else if(text.startsWith("my team is ")){
+        team = userText.substring(11).trim();
+    }
+
+    else if(text.includes("i'm a ") && text.includes(" fan")){
+        team = userText.substring(7, text.indexOf(" fan")).trim();
+    }
+
+    else if(text.includes("i am a ") && text.includes(" fan")){
+        team = userText.substring(7, text.indexOf(" fan")).trim();
+    }
+
+    if(team){
+        localStorage.setItem("favoriteFootballTeam", team);
+
+        return "I'll remember that you support " + team + ".";
+    }
+}
 let randomReplies = [
     "I'm not sure about that yet. You can teach me by typing: Learn: question = answer",
     "I don't know the answer yet, but I'm learning every day.",
