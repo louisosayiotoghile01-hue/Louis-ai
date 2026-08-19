@@ -159,32 +159,45 @@ if(favoriteFootballTeam){
 }
     return memory.join("\n");
 }
-async function getAIResponse(message){
+async function getAIResponse(message, history = []) {
 
-    const response = await fetch("/api/chat", {
-        method: "POST",
+    try {
 
-        headers: {
-            "Content-Type": "application/json"
-        },
+        const response = await fetch("/api/chat", {
 
-body: JSON.stringify({
-    message: message,
-    history: chatMemory,
-    memory: {
-    personal: getAllPersonalMemory(),
-    longTerm: getLongTermMemory()
-}
-})
-    });
+            method: "POST",
 
-    const data = await response.json();
+            headers: {
+                "Content-Type": "application/json"
+            },
 
-    if(!response.ok){
-        throw new Error(data.error || "API request failed");
+            body: JSON.stringify({
+                message: message,
+                conversation: history
+            })
+
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+
+            console.error("Louis AI API Error:", data);
+
+            return "I'm having trouble connecting to my AI brain right now.";
+
+        }
+
+        return data.reply || "I didn't receive a response.";
+
+    } catch (error) {
+
+        console.error("Louis AI Connection Error:", error);
+
+        return "I couldn't connect to Louis AI's server right now.";
+
     }
 
-    return data.reply;
 }
 async function loadKnowledge() {
 
