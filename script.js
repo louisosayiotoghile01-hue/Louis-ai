@@ -259,6 +259,237 @@ if(userText === ""){
 }
 
 const lowerText = userText.toLowerCase();
+    // ===============================
+// NATURAL PERSONAL MEMORY SYSTEM
+// ===============================
+
+function saveNaturalMemory(key, value){
+
+    value = value.trim();
+
+    if(!value) return;
+
+    // Save to personal memory
+    personalMemory[key] = value;
+
+    localStorage.setItem(
+        "personalMemory",
+        JSON.stringify(personalMemory)
+    );
+
+    // Also keep compatibility with Louis AI's older memory system
+    if(key === "name"){
+        localStorage.setItem("userName", value);
+    }
+
+    if(key === "favoriteColor"){
+        localStorage.setItem("favoriteColor", value);
+    }
+
+    if(key === "favoriteFood"){
+        localStorage.setItem("favoriteFood", value);
+    }
+
+    if(key === "hobby"){
+        localStorage.setItem("hobby", value);
+    }
+
+    if(key === "location"){
+        localStorage.setItem("userCity", value);
+    }
+
+    if(key === "favoriteAnimal"){
+        localStorage.setItem("favoriteAnimal", value);
+    }
+
+    if(key === "favoriteFootballTeam"){
+        localStorage.setItem("favoriteFootballTeam", value);
+    }
+}
+
+
+// NAME
+if(lowerText.startsWith("my name is ")){
+
+    let value = userText.substring(11).trim();
+
+    saveNaturalMemory("name", value);
+
+    chat.innerHTML += `
+        <div class="ai-message">
+            Nice to remember you, ${value}! 🧠
+        </div>
+    `;
+
+    chat.scrollTop = chat.scrollHeight;
+    return;
+}
+
+
+// FAVOURITE COLOUR
+if(
+    lowerText.startsWith("my favourite colour is ") ||
+    lowerText.startsWith("my favorite color is ") ||
+    lowerText.startsWith("my favourite color is ") ||
+    lowerText.startsWith("my favorite colour is ")
+){
+
+    let prefix = "";
+
+    if(lowerText.startsWith("my favourite colour is "))
+        prefix = "my favourite colour is ";
+
+    else if(lowerText.startsWith("my favorite color is "))
+        prefix = "my favorite color is ";
+
+    else if(lowerText.startsWith("my favourite color is "))
+        prefix = "my favourite color is ";
+
+    else
+        prefix = "my favorite colour is ";
+
+    let value = userText.substring(prefix.length).trim();
+
+    saveNaturalMemory("favoriteColor", value);
+
+    chat.innerHTML += `
+        <div class="ai-message">
+            I'll remember that your favourite colour is ${value}. 🎨🧠
+        </div>
+    `;
+
+    chat.scrollTop = chat.scrollHeight;
+    return;
+}
+
+
+// FAVOURITE FOOD
+if(
+    lowerText.startsWith("my favourite food is ") ||
+    lowerText.startsWith("my favorite food is ")
+){
+
+    let prefix = lowerText.startsWith("my favourite food is ")
+        ? "my favourite food is "
+        : "my favorite food is ";
+
+    let value = userText.substring(prefix.length).trim();
+
+    saveNaturalMemory("favoriteFood", value);
+
+    chat.innerHTML += `
+        <div class="ai-message">
+            I'll remember that your favourite food is ${value}. 🍽️🧠
+        </div>
+    `;
+
+    chat.scrollTop = chat.scrollHeight;
+    return;
+}
+
+
+// HOBBY
+if(lowerText.startsWith("my hobby is ")){
+
+    let value = userText.substring(12).trim();
+
+    saveNaturalMemory("hobby", value);
+
+    chat.innerHTML += `
+        <div class="ai-message">
+            I'll remember that your hobby is ${value}. 🎯🧠
+        </div>
+    `;
+
+    chat.scrollTop = chat.scrollHeight;
+    return;
+}
+
+
+// LOCATION
+if(lowerText.startsWith("i live in ")){
+
+    let value = userText.substring(10).trim();
+
+    saveNaturalMemory("location", value);
+
+    chat.innerHTML += `
+        <div class="ai-message">
+            I'll remember that you live in ${value}. 📍🧠
+        </div>
+    `;
+
+    chat.scrollTop = chat.scrollHeight;
+    return;
+}
+
+
+// FAVOURITE ANIMAL
+if(
+    lowerText.startsWith("my favourite animal is ") ||
+    lowerText.startsWith("my favorite animal is ")
+){
+
+    let prefix = lowerText.startsWith("my favourite animal is ")
+        ? "my favourite animal is "
+        : "my favorite animal is ";
+
+    let value = userText.substring(prefix.length).trim();
+
+    saveNaturalMemory("favoriteAnimal", value);
+
+    chat.innerHTML += `
+        <div class="ai-message">
+            I'll remember that your favourite animal is ${value}. 🐾🧠
+        </div>
+    `;
+
+    chat.scrollTop = chat.scrollHeight;
+    return;
+}
+
+
+// FAVOURITE FOOTBALL TEAM
+if(
+    lowerText.startsWith("my favourite football team is ") ||
+    lowerText.startsWith("my favorite football team is ")
+){
+
+    let prefix = lowerText.startsWith("my favourite football team is ")
+        ? "my favourite football team is "
+        : "my favorite football team is ";
+
+    let value = userText.substring(prefix.length).trim();
+
+    saveNaturalMemory("favoriteFootballTeam", value);
+
+    chat.innerHTML += `
+        <div class="ai-message">
+            I'll remember that your favourite football team is ${value}. ⚽🧠
+        </div>
+    `;
+
+    chat.scrollTop = chat.scrollHeight;
+    return;
+}
+
+
+// SUPPORTING A FOOTBALL TEAM
+if(lowerText.startsWith("i support ")){
+
+    let value = userText.substring(10).trim();
+
+    saveNaturalMemory("favoriteFootballTeam", value);
+
+    chat.innerHTML += `
+        <div class="ai-message">
+            I'll remember that you support ${value}. ⚽🧠
+        </div>
+    `;
+
+    chat.scrollTop = chat.scrollHeight;
+    return;
+            }
 // NATURAL FOOTBALL TEAM MEMORY
 
 if(
