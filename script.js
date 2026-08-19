@@ -829,8 +829,7 @@ if(
     try{
 
         // Ask the Vercel API
-        const reply = await getAIResponse(userText);
-
+        const reply = await getAIResponse(userText, conversation);
         // Remove typing message
         const typing = document.getElementById("typing");
 
