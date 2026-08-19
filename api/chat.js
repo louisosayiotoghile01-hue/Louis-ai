@@ -30,7 +30,6 @@ module.exports = async function handler(req, res) {
 
         // Louis AI instructions
         const input = [
-const input = [
 
     {
         role: "developer",
