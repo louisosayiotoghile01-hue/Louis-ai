@@ -257,6 +257,8 @@ async function sendMessage(){
 if(userText === ""){
     return;
 }
+    // Clear the input immediately
+input.value = "";
 
 const lowerText = userText.toLowerCase();
     // ===============================
@@ -561,9 +563,6 @@ chat.scrollTop = chat.scrollHeight;
         "conversation",
         JSON.stringify(conversation)
     );
-
-    // Clear input
-    input.value = "";
 // UNIVERSAL REMEMBER THAT MEMORY
 
 const rememberText = userText.trim();
