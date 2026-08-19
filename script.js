@@ -172,8 +172,15 @@ async function getAIResponse(message, history = []) {
             },
 
             body: JSON.stringify({
+
                 message: message,
-                conversation: history
+
+                // Send conversation history correctly
+                history: history,
+
+                // Send Louis AI's personal memory
+                memory: getAllPersonalMemory()
+
             })
 
         });
@@ -252,7 +259,36 @@ if(userText === ""){
 }
 
 const lowerText = userText.toLowerCase();
+// NATURAL FOOTBALL TEAM MEMORY
 
+if(
+    lowerText.startsWith("my favourite football team is ") ||
+    lowerText.startsWith("my favorite football team is ")
+){
+
+    let phrase = lowerText.startsWith(
+        "my favourite football team is "
+    )
+        ? "my favourite football team is "
+        : "my favorite football team is ";
+
+    let team = userText.substring(phrase.length).trim();
+
+    if(team){
+
+        savePersonalMemory(
+            "favoriteFootballTeam",
+            team
+        );
+
+        // Keep the old storage too
+        localStorage.setItem(
+            "favoriteFootballTeam",
+            team
+        );
+
+    }
+}
     // Show user's message immediately
     chat.innerHTML += `
         <div class="user-message">
