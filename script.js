@@ -257,6 +257,19 @@ async function sendMessage(){
 if(userText === ""){
     return;
 }
+    // SHOW USER MESSAGE FIRST
+const userMessageDiv = document.createElement("div");
+
+userMessageDiv.className = "user-message";
+
+userMessageDiv.textContent = userText;
+
+chat.appendChild(userMessageDiv);
+
+chat.scrollTop = chat.scrollHeight;
+
+// Clear input
+input.value = "";
     // Clear the input immediately
 input.value = "";
 
@@ -522,17 +535,6 @@ if(
 
     }
 }
-    // Show user's message immediately
-const userMessageDiv = document.createElement("div");
-
-userMessageDiv.className = "user-message";
-
-userMessageDiv.textContent = userText;
-
-chat.appendChild(userMessageDiv);
-
-chat.scrollTop = chat.scrollHeight;
-
     // Remember user's message
     lastUserMessage = userText;
 
