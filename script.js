@@ -270,6 +270,70 @@ chat.scrollTop = chat.scrollHeight;
 
 // Clear input
 input.value = "";
+    // =====================================
+// LOUIS AI MEMORY DASHBOARD
+// =====================================
+
+if(
+    lowerText === "show my memories" ||
+    lowerText === "show my memory" ||
+    lowerText === "what do you remember about me" ||
+    lowerText === "what do you know about me"
+){
+
+    const memories = getAllPersonalMemory();
+
+    let memoryList = "";
+
+    const memoryNames = {
+        name: "👤 Name",
+        favoriteColor: "🎨 Favourite colour",
+        favouriteColor: "🎨 Favourite colour",
+        favoriteFood: "🍽️ Favourite food",
+        favouriteFood: "🍽️ Favourite food",
+        birthday: "🎂 Birthday",
+        hobby: "🎯 Hobby",
+        location: "📍 Location",
+        favoriteAnimal: "🐾 Favourite animal",
+        favoriteFootballTeam: "⚽ Favourite football team"
+    };
+
+    for(let key in memories){
+
+        if(memories[key]){
+
+            let label = memoryNames[key] || key;
+
+            memoryList += `
+                <div style="margin-bottom:12px;">
+                    <strong>${label}:</strong>
+                    ${memories[key]}
+                </div>
+            `;
+        }
+    }
+
+    if(memoryList === ""){
+
+        memoryList = `
+            <div>
+                I don't have any personal memories about you yet. 🧠
+            </div>
+        `;
+    }
+
+    chat.innerHTML += `
+        <div class="ai-message">
+            <strong>🧠 Here's what I remember about you:</strong>
+            <br><br>
+            ${memoryList}
+        </div>
+    `;
+
+    chat.scrollTop = chat.scrollHeight;
+
+    return;
+}
     // Clear the input immediately
 input.value = "";
 
