@@ -338,6 +338,50 @@ if(
     return;
 }
     // =====================================
+// FORGET ALL PERSONAL MEMORIES
+// =====================================
+
+if(
+    lowerText === "forget all my memories" ||
+    lowerText === "forget all my memory" ||
+    lowerText === "forget everything you remember about me" ||
+    lowerText === "forget everything about me"
+){
+
+    const memoryKeys = [
+        "userName",
+        "name",
+        "favoriteColor",
+        "favouriteColor",
+        "favoriteFood",
+        "favouriteFood",
+        "birthday",
+        "hobby",
+        "location",
+        "favoriteAnimal",
+        "favouriteAnimal",
+        "favoriteFootballTeam",
+        "favouriteFootballTeam",
+        "personalMemory",
+        "personalMemories"
+    ];
+
+    memoryKeys.forEach(function(key){
+        localStorage.removeItem(key);
+    });
+
+    chat.innerHTML += `
+        <div class="ai-message">
+            🗑️ I've forgotten all your personal memories.
+            🧠
+        </div>
+    `;
+
+    chat.scrollTop = chat.scrollHeight;
+
+    return;
+        }
+    // =====================================
 // LOUIS AI CHANGE MEMORY
 // =====================================
 
