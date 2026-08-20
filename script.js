@@ -337,6 +337,64 @@ if(
 
     return;
 }
+    // =====================================
+// LOUIS AI CHANGE MEMORY
+// =====================================
+
+if(
+    lowerText.startsWith("change my ") &&
+    lowerText.includes(" to ")
+){
+
+    const changeText = userText.trim();
+
+    const parts = changeText.substring(9).split(" to ");
+
+    const memoryName = parts[0].trim().toLowerCase();
+    const newValue = parts.slice(1).join(" to ").trim();
+
+    const memoryMap = {
+
+        "name": "name",
+
+        "favourite colour": "favoriteColor",
+        "favorite colour": "favoriteColor",
+        "favourite color": "favoriteColor",
+        "favorite color": "favoriteColor",
+
+        "favourite food": "favoriteFood",
+        "favorite food": "favoriteFood",
+
+        "birthday": "birthday",
+
+        "hobby": "hobby",
+
+        "location": "location",
+
+        "favourite animal": "favoriteAnimal",
+        "favorite animal": "favoriteAnimal",
+
+        "favourite football team": "favoriteFootballTeam",
+        "favorite football team": "favoriteFootballTeam"
+    };
+
+    const memoryKey = memoryMap[memoryName];
+
+    if(memoryKey && newValue){
+
+        saveNaturalMemory(memoryKey, newValue);
+
+        chat.innerHTML += `
+            <div class="ai-message">
+                ✅ I've updated your ${memoryName} to <strong>${newValue}</strong>. 🧠
+            </div>
+        `;
+
+        chat.scrollTop = chat.scrollHeight;
+
+        return;
+    }
+}
     // ===============================
 // NATURAL PERSONAL MEMORY SYSTEM
 // ===============================
