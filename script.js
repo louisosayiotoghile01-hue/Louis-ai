@@ -335,7 +335,6 @@ if(
     return;
 }
     // Clear the input immediately
-input.value = "";
 
 const lowerText = userText.toLowerCase();
     // ===============================
