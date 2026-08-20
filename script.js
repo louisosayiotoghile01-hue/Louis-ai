@@ -315,7 +315,7 @@ if(
         <br><br>
 
         <button
-            onclick="document.getElementById('userInput').value='forget my ${key}'; document.getElementById('userInput').focus();"
+            onclick="document.getElementById('userInput').value='forget my ${label.replace(':','')}'; sendMessage();"
             style="
                 padding:8px 14px;
                 border:none;
