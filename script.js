@@ -308,11 +308,26 @@ if(
             let label = memoryNames[key] || key;
 
             memoryList += `
-                <div style="margin-bottom:12px;">
-                    <strong>${label}:</strong>
-                    ${memories[key]}
-                </div>
-            `;
+    <div style="margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid #ccc;">
+        <strong>${label}:</strong>
+        ${memories[key]}
+
+        <br><br>
+
+        <button
+            onclick="document.getElementById('userInput').value='forget my ${key}'; document.getElementById('userInput').focus();"
+            style="
+                padding:8px 14px;
+                border:none;
+                border-radius:8px;
+                cursor:pointer;
+                font-size:14px;
+            "
+        >
+            🗑️ Forget
+        </button>
+    </div>
+`;
         }
     }
 
