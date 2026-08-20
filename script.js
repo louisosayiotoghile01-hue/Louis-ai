@@ -395,6 +395,88 @@ if(
         return;
     }
 }
+    // =====================================
+// LOUIS AI FORGET MEMORY
+// =====================================
+
+if(lowerText.startsWith("forget my ")){
+
+    const forgetName = lowerText
+        .substring(10)
+        .trim();
+
+    const memoryMap = {
+
+        "name": "name",
+
+        "favourite colour": "favoriteColor",
+        "favorite colour": "favoriteColor",
+        "favourite color": "favoriteColor",
+        "favorite color": "favoriteColor",
+
+        "favourite food": "favoriteFood",
+        "favorite food": "favoriteFood",
+
+        "birthday": "birthday",
+
+        "hobby": "hobby",
+
+        "location": "location",
+
+        "favourite animal": "favoriteAnimal",
+        "favorite animal": "favoriteAnimal",
+
+        "favourite football team": "favoriteFootballTeam",
+        "favorite football team": "favoriteFootballTeam"
+    };
+
+    const memoryKey = memoryMap[forgetName];
+
+    if(memoryKey){
+
+        const memories = getAllPersonalMemory();
+
+        if(memories[memoryKey]){
+
+            delete memories[memoryKey];
+
+            localStorage.setItem(
+                "personalMemory",
+                JSON.stringify(memories)
+            );
+
+            // Keep older storage keys synchronized
+            localStorage.removeItem(memoryKey);
+
+            if(memoryKey === "name"){
+                localStorage.removeItem("userName");
+            }
+
+            if(memoryKey === "location"){
+                localStorage.removeItem("userCity");
+            }
+
+            chat.innerHTML += `
+                <div class="ai-message">
+                    🗑️ I've forgotten your <strong>${forgetName}</strong>.
+                </div>
+            `;
+
+        }else{
+
+            chat.innerHTML += `
+                <div class="ai-message">
+                    🧠 I don't have a saved memory for your
+                    <strong>${forgetName}</strong>.
+                </div>
+            `;
+        }
+
+        chat.scrollTop = chat.scrollHeight;
+
+        return;
+    }
+}
     // ===============================
 // NATURAL PERSONAL MEMORY SYSTEM
 // ===============================
