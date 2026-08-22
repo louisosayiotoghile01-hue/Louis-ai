@@ -753,6 +753,62 @@ if(
     let value = userText.substring(prefix.length).trim();
 
     saveNaturalMemory("favoriteFootballTeam", value);
+    // =====================================
+// SAVE NATURAL PERSONAL MEMORY
+// =====================================
+
+function saveNaturalMemory(key, value){
+
+    value = value.trim();
+
+    if(!value){
+        return;
+    }
+
+    personalMemory[key] = value;
+
+    localStorage.setItem(
+        "personalMemory",
+        JSON.stringify(personalMemory)
+    );
+
+    // Keep older Louis AI memory keys working
+
+    if(key === "name"){
+        localStorage.setItem("userName", value);
+    }
+
+    if(key === "favoriteColor"){
+        localStorage.setItem("favoriteColor", value);
+    }
+
+    if(key === "favoriteFood"){
+        localStorage.setItem("favoriteFood", value);
+    }
+
+    if(key === "birthday"){
+        localStorage.setItem("birthday", value);
+    }
+
+    if(key === "hobby"){
+        localStorage.setItem("hobby", value);
+    }
+
+    if(key === "location"){
+        localStorage.setItem("userCity", value);
+    }
+
+    if(key === "favoriteAnimal"){
+        localStorage.setItem("favoriteAnimal", value);
+    }
+
+    if(key === "favoriteFootballTeam"){
+        localStorage.setItem(
+            "favoriteFootballTeam",
+            value
+        );
+    }
+        }
 // =====================================
 // LOUIS AI UNIFIED PERSONAL MEMORY SYSTEM
 // =====================================
