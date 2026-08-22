@@ -514,65 +514,103 @@ if(
         return;
     }
 }
-    // =====================================
+   // =====================================
 // FORGET MEMORY BY INTERNAL KEY
 // =====================================
 
 if(lowerText.startsWith("forget memory ")){
 
-    const memoryKey = lowerText
+    const requestedKey = lowerText
         .substring(14)
         .trim();
 
-    const memories = getAllPersonalMemory();
+    // Convert lowercase command into the real storage key
+    const keyMap = {
 
-    if(memories[memoryKey]){
+        "name": "name",
 
-        delete memories[memoryKey];
+        "favoritecolor": "favoriteColor",
+        "favouritecolor": "favoriteColor",
 
-        localStorage.setItem(
-            "personalMemory",
-            JSON.stringify(memories)
-        );
+        "favoritefood": "favoriteFood",
+        "favouritefood": "favoriteFood",
 
-        // Remove old storage keys too
-        localStorage.removeItem(memoryKey);
+        "birthday": "birthday",
 
-        if(memoryKey === "name"){
-            localStorage.removeItem("userName");
+        "hobby": "hobby",
+
+        "location": "location",
+
+        "favoriteanimal": "favoriteAnimal",
+        "favouriteanimal": "favoriteAnimal",
+
+        "favoritefootballteam": "favoriteFootballTeam",
+        "favouritefootballteam": "favoriteFootballTeam"
+    };
+
+    const memoryKey = keyMap[requestedKey];
+
+    if(memoryKey){
+
+        const memories = getAllPersonalMemory();
+
+        if(memories[memoryKey]){
+
+            delete memories[memoryKey];
+
+            localStorage.setItem(
+                "personalMemory",
+                JSON.stringify(memories)
+            );
+
+            // Remove old storage keys too
+            localStorage.removeItem(memoryKey);
+
+            if(memoryKey === "name"){
+                localStorage.removeItem("userName");
+            }
+
+            if(memoryKey === "location"){
+                localStorage.removeItem("userCity");
+            }
+
+            if(memoryKey === "favoriteColor"){
+                localStorage.removeItem("favouriteColor");
+            }
+
+            if(memoryKey === "favoriteFood"){
+                localStorage.removeItem("favouriteFood");
+            }
+
+            if(memoryKey === "favoriteAnimal"){
+                localStorage.removeItem("favouriteAnimal");
+            }
+
+            if(memoryKey === "favoriteFootballTeam"){
+                localStorage.removeItem("favouriteFootballTeam");
+            }
+
+            chat.innerHTML += `
+                <div class="ai-message">
+                    🗑️ I've forgotten that memory. 🧠
+                </div>
+            `;
+
+        }else{
+
+            chat.innerHTML += `
+                <div class="ai-message">
+                    🧠 I don't have that memory saved.
+                </div>
+            `;
+
         }
-
-        if(memoryKey === "location"){
-            localStorage.removeItem("userCity");
-        }
-
-        if(memoryKey === "favoriteColor"){
-            localStorage.removeItem("favouriteColor");
-        }
-
-        if(memoryKey === "favoriteFood"){
-            localStorage.removeItem("favouriteFood");
-        }
-
-        if(memoryKey === "favoriteAnimal"){
-            localStorage.removeItem("favouriteAnimal");
-        }
-
-        if(memoryKey === "favoriteFootballTeam"){
-            localStorage.removeItem("favouriteFootballTeam");
-        }
-
-        chat.innerHTML += `
-            <div class="ai-message">
-                🗑️ I've forgotten that memory. 🧠
-            </div>
-        `;
 
     }else{
 
         chat.innerHTML += `
             <div class="ai-message">
-                🧠 I don't have that memory saved.
+                🧠 I don't recognize that memory.
             </div>
         `;
 
@@ -581,7 +619,7 @@ if(lowerText.startsWith("forget memory ")){
     chat.scrollTop = chat.scrollHeight;
 
     return;
-            }
+        }
     // =====================================
 // LOUIS AI FORGET MEMORY
 // =====================================
