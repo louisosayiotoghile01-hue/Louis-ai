@@ -391,7 +391,53 @@ if(
         }
     }
 
-    if(",
+    if(memoryList === ""){
+
+        memoryList = `
+            <div>
+                I don't have any personal memories about you yet. 🧠
+            </div>
+        `;
+    }
+
+    chat.innerHTML += `
+        <div class="ai-message">
+            <strong>🧠 Here's what I remember about you:</strong>
+            <br><br>
+            ${memoryList}
+        </div>
+    `;
+
+    chat.scrollTop = chat.scrollHeight;
+
+    return;
+}
+    // =====================================
+// FORGET ALL PERSONAL MEMORIES
+// =====================================
+
+if(
+    lowerText === "forget all my memories" ||
+    lowerText === "forget all my memory" ||
+    lowerText === "forget everything you remember about me" ||
+    lowerText === "forget everything about me"
+){
+
+    const memoryKeys = [
+        "userName",
+        "name",
+        "favoriteColor",
+        "favouriteColor",
+        "favoriteFood",
+        "favouriteFood",
+        "birthday",
+        "hobby",
+        "location",
+        "favoriteAnimal",
+        "favouriteAnimal",
+        "favoriteFootballTeam",
+        "favouriteFootballTeam",
+        "personalMemory",
         "personalMemories"
     ];
 
@@ -753,1071 +799,64 @@ if(
     let value = userText.substring(prefix.length).trim();
 
     saveNaturalMemory("favoriteFootballTeam", value);
-    // =====================================
-// SAVE NATURAL PERSONAL MEMORY
-// =====================================
-
-function saveNaturalMemory(key, value){
-
-    value = value.trim();
-
-    if(!value){
-        return;
-    }
-
-    personalMemory[key] = value;
-
-    localStorage.setItem(
-        "personalMemory",
-        JSON.stringify(personalMemory)
-    );
-
-    // Keep older Louis AI memory keys working
-
-    if(key === "name"){
-        localStorage.setItem("userName", value);
-    }
-
-    if(key === "favoriteColor"){
-        localStorage.setItem("favoriteColor", value);
-    }
-
-    if(key === "favoriteFood"){
-        localStorage.setItem("favoriteFood", value);
-    }
-
-    if(key === "birthday"){
-        localStorage.setItem("birthday", value);
-    }
-
-    if(key === "hobby"){
-        localStorage.setItem("hobby", value);
-    }
-
-    if(key === "location"){
-        localStorage.setItem("userCity", value);
-    }
-
-    if(key === "favoriteAnimal"){
-        localStorage.setItem("favoriteAnimal", value);
-    }
-
-    if(key === "favoriteFootballTeam"){
-        localStorage.setItem(
-            "favoriteFootballTeam",
-            value
-        );
-    }
-        }
-// =====================================
-// LOUIS AI UNIFIED PERSONAL MEMORY SYSTEM
-// =====================================
-
-function removePersonalMemory(key){
-
-    // Remove from main memory
-    delete personalMemory[key];
-
-    localStorage.setItem(
-        "personalMemory",
-        JSON.stringify(personalMemory)
-    );
-
-    // Remove older storage keys too
-    if(key === "name"){
-        localStorage.removeItem("userName");
-        localStorage.removeItem("name");
-    }
-
-    if(key === "favoriteColor"){
-        localStorage.removeItem("favoriteColor");
-        localStorage.removeItem("favouriteColor");
-    }
-
-    if(key === "favoriteFood"){
-        localStorage.removeItem("favoriteFood");
-        localStorage.removeItem("favouriteFood");
-    }
-
-    if(key === "birthday"){
-        localStorage.removeItem("birthday");
-    }
-
-    if(key === "hobby"){
-        localStorage.removeItem("hobby");
-    }
-
-    if(key === "location"){
-        localStorage.removeItem("userCity");
-        localStorage.removeItem("location");
-    }
-
-    if(key === "favoriteAnimal"){
-        localStorage.removeItem("favoriteAnimal");
-        localStorage.removeItem("favouriteAnimal");
-    }
-
-    if(key === "favoriteFootballTeam"){
-        localStorage.removeItem("favoriteFootballTeam");
-        localStorage.removeItem("favouriteFootballTeam");
-    }
-}
-
-
-// =====================================
-// SHOW MY MEMORIES
-// =====================================
-
-if(
-    lowerText === "show my memories" ||
-    lowerText === "show my memory" ||
-    lowerText === "what do you remember about me" ||
-    lowerText === "what do you know about me" ||
-    lowerText === "show what you remember"
-){
-
-    const memories = getAllPersonalMemory();
-
-    const memoryNames = {
-
-        name: "👤 Name",
-
-        favoriteColor: "🎨 Favourite colour",
-
-        favoriteFood: "🍽️ Favourite food",
-
-        birthday: "🎂 Birthday",
-
-        hobby: "🎯 Hobby",
-
-        location: "📍 Location",
-
-        favoriteAnimal: "🐾 Favourite animal",
-
-        favoriteFootballTeam: "⚽ Favourite football team"
-
-    };
-
-    let memoryList = "";
-
-    for(let key in memoryNames){
-
-        if(memories[key]){
-
-            memoryList += `
-                <div style="
-                    margin-bottom:16px;
-                    padding:12px;
-                    border-bottom:1px solid #ccc;
-                ">
-
-                    <strong>${memoryNames[key]}</strong>
-
-                    <br>
-
-                    ${memories[key]}
-
-                    <br><br>
-
-                    <button
-                        onclick="forgetPersonalMemory('${key}')"
-                        style="
-                            padding:8px 14px;
-                            border:none;
-                            border-radius:8px;
-                            cursor:pointer;
-                            font-size:14px;
-                        "
-                    >
-                        🗑️ Forget
-                    </button>
-
-                </div>
-            `;
-        }
-    }
-
-    if(memoryList === ""){
-
-        memoryList = `
-            <div>
-                I don't have any personal memories about you yet. 🧠
-            </div>
-        `;
-    }
 
     chat.innerHTML += `
         <div class="ai-message">
-
-            <strong>
-                🧠 Here's what I remember about you:
-            </strong>
-
-            <br><br>
-
-            ${memoryList}
-
+            I'll remember that your favourite football team is ${value}. ⚽🧠
         </div>
     `;
 
     chat.scrollTop = chat.scrollHeight;
-
     return;
 }
 
 
-// =====================================
-// FORGET BUTTON
-// =====================================
+// SUPPORTING A FOOTBALL TEAM
+if(lowerText.startsWith("i support ")){
 
-function forgetPersonalMemory(key){
+    let value = userText.substring(10).trim();
 
-    const chat = document.getElementById("chat");
-
-    const memoryNames = {
-
-        name: "name",
-
-        favoriteColor: "favourite colour",
-
-        favoriteFood: "favourite food",
-
-        birthday: "birthday",
-
-        hobby: "hobby",
-
-        location: "location",
-
-        favoriteAnimal: "favourite animal",
-
-        favoriteFootballTeam: "favourite football team"
-
-    };
-
-    if(personalMemory[key]){
-
-        removePersonalMemory(key);
-
-        chat.innerHTML += `
-            <div class="ai-message">
-
-                🗑️ I've forgotten your
-                <strong>${memoryNames[key]}</strong>.
-
-            </div>
-        `;
-
-    }else{
-
-        chat.innerHTML += `
-            <div class="ai-message">
-
-                🧠 I don't have a saved memory for
-                <strong>${memoryNames[key]}</strong>.
-
-            </div>
-        `;
-    }
-
-    chat.scrollTop = chat.scrollHeight;
-}
-
-
-// =====================================
-// FORGET ALL PERSONAL MEMORIES
-// =====================================
-
-if(
-    lowerText === "forget all my memories" ||
-    lowerText === "forget all my memory" ||
-    lowerText === "forget everything you remember about me" ||
-    lowerText === "forget everything about me"
-){
-
-    personalMemory = {};
-
-    localStorage.removeItem("personalMemory");
-
-    const oldMemoryKeys = [
-
-        "userName",
-        "name",
-
-        "favoriteColor",
-        "favouriteColor",
-
-        "favoriteFood",
-        "favouriteFood",
-
-        "birthday",
-
-        "hobby",
-
-        "userCity",
-        "location",
-
-        "favoriteAnimal",
-        "favouriteAnimal",
-
-        "favoriteFootballTeam",
-        "favouriteFootballTeam",
-
-        "personalMemories",
-        "personalMemory"
-
-    ];
-
-    oldMemoryKeys.forEach(function(key){
-
-        localStorage.removeItem(key);
-
-    });
+    saveNaturalMemory("favoriteFootballTeam", value);
 
     chat.innerHTML += `
         <div class="ai-message">
-
-            🗑️ I've forgotten all your personal memories.
-            🧠
-
+            I'll remember that you support ${value}. ⚽🧠
         </div>
     `;
 
     chat.scrollTop = chat.scrollHeight;
-
     return;
-}
-
-
-// =====================================
-// CHANGE PERSONAL MEMORY
-// =====================================
-
-if(
-    lowerText.startsWith("change my ") &&
-    lowerText.includes(" to ")
-){
-
-    const changeText = userText.trim();
-
-    const parts = changeText
-        .substring(9)
-        .split(" to ");
-
-    const memoryName = parts[0]
-        .trim()
-        .toLowerCase();
-
-    const newValue = parts
-        .slice(1)
-        .join(" to ")
-        .trim();
-
-    const memoryMap = {
-
-        "name": "name",
-
-        "favourite colour": "favoriteColor",
-        "favorite colour": "favoriteColor",
-        "favourite color": "favoriteColor",
-        "favorite color": "favoriteColor",
-
-        "favourite food": "favoriteFood",
-        "favorite food": "favoriteFood",
-
-        "birthday": "birthday",
-
-        "hobby": "hobby",
-
-        "location": "location",
-        "where i live": "location",
-
-        "favourite animal": "favoriteAnimal",
-        "favorite animal": "favoriteAnimal",
-
-        "favourite football team": "favoriteFootballTeam",
-        "favorite football team": "favoriteFootballTeam"
-
-    };
-
-    const memoryKey = memoryMap[memoryName];
-
-    if(memoryKey && newValue){
-
-        saveNaturalMemory(
-            memoryKey,
-            newValue
-        );
-
-        chat.innerHTML += `
-            <div class="ai-message">
-
-                ✅ I've updated your
-                <strong>${memoryName}</strong>
-                to <strong>${newValue}</strong>. 🧠
-
-            </div>
-        `;
-
-        chat.scrollTop = chat.scrollHeight;
-
-        return;
-    }
-
-    if(!memoryKey){
-
-        chat.innerHTML += `
-            <div class="ai-message">
-
-                🧠 I don't recognize that memory.
-
-                <br><br>
-
-                Try:
-
-                <br>
-
-                <strong>
-                Change my name to Louis
-                </strong>
-
-            </div>
-        `;
-
-        chat.scrollTop = chat.scrollHeight;
-
-        return;
-    }
-}
-
-
-// =====================================
-// INDIVIDUAL FORGET COMMANDS
-// =====================================
-
-if(lowerText.startsWith("forget my ")){
-
-    const forgetName = lowerText
-        .substring(10)
-        .trim();
-
-    const memoryMap = {
-
-        "name": "name",
-
-        "favourite colour": "favoriteColor",
-        "favorite colour": "favoriteColor",
-        "favourite color": "favoriteColor",
-        "favorite color": "favoriteColor",
-
-        "favourite food": "favoriteFood",
-        "favorite food": "favoriteFood",
-
-        "birthday": "birthday",
-
-        "hobby": "hobby",
-
-        "location": "location",
-        "where i live": "location",
-
-        "favourite animal": "favoriteAnimal",
-        "favorite animal": "favoriteAnimal",
-
-        "favourite football team": "favoriteFootballTeam",
-        "favorite football team": "favoriteFootballTeam"
-
-    };
-
-    const memoryKey = memoryMap[forgetName];
-
-    if(memoryKey){
-
-        if(personalMemory[memoryKey]){
-
-            removePersonalMemory(memoryKey);
-
-            chat.innerHTML += `
-                <div class="ai-message">
-
-                    🗑️ I've forgotten your
-                    <strong>${forgetName}</strong>.
-
-                </div>
-            `;
-
-        }else{
-
-            chat.innerHTML += `
-                <div class="ai-message">
-
-                    🧠 I don't have a saved memory for
-                    <strong>${forgetName}</strong>.
-
-                </div>
-            `;
-        }
-
-        chat.scrollTop = chat.scrollHeight;
-
-        return;
-    }
-}
-
-
-// =====================================
-// NATURAL PERSONAL MEMORY
-// =====================================
-
-
-// NAME
-
-if(lowerText.startsWith("my name is ")){
-
-    const value = userText
-        .substring(11)
-        .trim();
-
-    saveNaturalMemory(
-        "name",
-        value
-    );
-
-    chat.innerHTML += `
-        <div class="ai-message">
-
-            Nice to remember you,
-            <strong>${value}</strong>! 🧠
-
-        </div>
-    `;
-
-    chat.scrollTop = chat.scrollHeight;
-
-    return;
-}
-
-
-// FAVOURITE COLOUR
-
-if(
-    lowerText.startsWith("my favourite colour is ") ||
-    lowerText.startsWith("my favorite colour is ") ||
-    lowerText.startsWith("my favourite color is ") ||
-    lowerText.startsWith("my favorite color is ")
-){
-
-    let prefix = "";
-
-    if(lowerText.startsWith("my favourite colour is "))
-        prefix = "my favourite colour is ";
-
-    else if(lowerText.startsWith("my favorite colour is "))
-        prefix = "my favorite colour is ";
-
-    else if(lowerText.startsWith("my favourite color is "))
-        prefix = "my favourite color is ";
-
-    else
-        prefix = "my favorite color is ";
-
-    const value = userText
-        .substring(prefix.length)
-        .trim();
-
-    saveNaturalMemory(
-        "favoriteColor",
-        value
-    );
-
-    chat.innerHTML += `
-        <div class="ai-message">
-
-            I'll remember that your favourite colour is
-            <strong>${value}</strong>. 🎨🧠
-
-        </div>
-    `;
-
-    chat.scrollTop = chat.scrollHeight;
-
-    return;
-}
-
-
-// FAVOURITE FOOD
-
-if(
-    lowerText.startsWith("my favourite food is ") ||
-    lowerText.startsWith("my favorite food is ")
-){
-
-    const prefix =
-        lowerText.startsWith("my favourite food is ")
-        ? "my favourite food is "
-        : "my favorite food is ";
-
-    const value = userText
-        .substring(prefix.length)
-        .trim();
-
-    saveNaturalMemory(
-        "favoriteFood",
-        value
-    );
-
-    chat.innerHTML += `
-        <div class="ai-message">
-
-            I'll remember that your favourite food is
-            <strong>${value}</strong>. 🍽️🧠
-
-        </div>
-    `;
-
-    chat.scrollTop = chat.scrollHeight;
-
-    return;
-}
-
-
-// BIRTHDAY
-
-if(
-    lowerText.startsWith("my birthday is ") ||
-    lowerText.startsWith("i was born on ")
-){
-
-    let prefix = "";
-
-    if(lowerText.startsWith("my birthday is "))
-        prefix = "my birthday is ";
-
-    else
-        prefix = "i was born on ";
-
-    const value = userText
-        .substring(prefix.length)
-        .trim();
-
-    saveNaturalMemory(
-        "birthday",
-        value
-    );
-
-    chat.innerHTML += `
-        <div class="ai-message">
-
-            I'll remember your birthday is
-            <strong>${value}</strong>. 🎂🧠
-
-        </div>
-    `;
-
-    chat.scrollTop = chat.scrollHeight;
-
-    return;
-}
-
-
-// HOBBY
-
-if(lowerText.startsWith("my hobby is ")){
-
-    const value = userText
-        .substring(12)
-        .trim();
-
-    saveNaturalMemory(
-        "hobby",
-        value
-    );
-
-    chat.innerHTML += `
-        <div class="ai-message">
-
-            I'll remember that your hobby is
-            <strong>${value}</strong>. 🎯🧠
-
-        </div>
-    `;
-
-    chat.scrollTop = chat.scrollHeight;
-
-    return;
-}
-
-
-// LOCATION
-
-if(lowerText.startsWith("i live in ")){
-
-    const value = userText
-        .substring(10)
-        .trim();
-
-    saveNaturalMemory(
-        "location",
-        value
-    );
-
-    chat.innerHTML += `
-        <div class="ai-message">
-
-            I'll remember that you live in
-            <strong>${value}</strong>. 📍🧠
-
-        </div>
-    `;
-
-    chat.scrollTop = chat.scrollHeight;
-
-    return;
-}
-
-
-// FAVOURITE ANIMAL
-
-if(
-    lowerText.startsWith("my favourite animal is ") ||
-    lowerText.startsWith("my favorite animal is ")
-){
-
-    const prefix =
-        lowerText.startsWith("my favourite animal is ")
-        ? "my favourite animal is "
-        : "my favorite animal is ";
-
-    const value = userText
-        .substring(prefix.length)
-        .trim();
-
-    saveNaturalMemory(
-        "favoriteAnimal",
-        value
-    );
-
-    chat.innerHTML += `
-        <div class="ai-message">
-
-            I'll remember that your favourite animal is
-            <strong>${value}</strong>. 🐾🧠
-
-        </div>
-    `;
-
-    chat.scrollTop = chat.scrollHeight;
-
-    return;
-}
-
-
-// FAVOURITE FOOTBALL TEAM
+            }
+// NATURAL FOOTBALL TEAM MEMORY
 
 if(
     lowerText.startsWith("my favourite football team is ") ||
     lowerText.startsWith("my favorite football team is ")
 ){
 
-    const prefix =
-        lowerText.startsWith("my favourite football team is ")
+    let phrase = lowerText.startsWith(
+        "my favourite football team is "
+    )
         ? "my favourite football team is "
         : "my favorite football team is ";
 
-    const value = userText
-        .substring(prefix.length)
-        .trim();
+    let team = userText.substring(phrase.length).trim();
 
-    saveNaturalMemory(
-        "favoriteFootballTeam",
-        value
-    );
+    if(team){
 
-    chat.innerHTML += `
-        <div class="ai-message">
+        savePersonalMemory(
+            "favoriteFootballTeam",
+            team
+        );
 
-            I'll remember that your favourite football team is
-            <strong>${value}</strong>. ⚽🧠
+        // Keep the old storage too
+        localStorage.setItem(
+            "favoriteFootballTeam",
+            team
+        );
 
-        </div>
-    `;
-
-    chat.scrollTop = chat.scrollHeight;
-
-    return;
+    }
 }
-
-
-// I SUPPORT...
-
-if(lowerText.startsWith("i support ")){
-
-    const value = userText
-        .substring(10)
-        .trim();
-
-    saveNaturalMemory(
-        "favoriteFootballTeam",
-        value
-    );
-
-    chat.innerHTML += `
-        <div class="ai-message">
-
-            I'll remember that you support
-            <strong>${value}</strong>. ⚽🧠
-
-        </div>
-    `;
-
-    chat.scrollTop = chat.scrollHeight;
-
-    return;
-}
-
-
-// =====================================
-// PERSONAL MEMORY QUESTIONS
-// =====================================
-
-
-// NAME
-
-if(
-    lowerText === "what is my name" ||
-    lowerText === "what's my name"
-){
-
-    const name =
-        personalMemory.name ||
-        localStorage.getItem("userName");
-
-    chat.innerHTML += `
-        <div class="ai-message">
-
-            ${
-                name
-                ? "Your name is <strong>" + name + "</strong>. 👋"
-                : "I don't have your name saved yet. 👤"
-            }
-
-        </div>
-    `;
-
-    chat.scrollTop = chat.scrollHeight;
-
-    return;
-}
-
-
-// COLOUR
-
-if(
-    lowerText.includes("what is my favourite colour") ||
-    lowerText.includes("what is my favorite colour") ||
-    lowerText.includes("what is my favourite color") ||
-    lowerText.includes("what is my favorite color") ||
-    lowerText.includes("what's my favourite colour") ||
-    lowerText.includes("what's my favorite color")
-){
-
-    const color =
-        personalMemory.favoriteColor ||
-        localStorage.getItem("favoriteColor");
-
-    chat.innerHTML += `
-        <div class="ai-message">
-
-            ${
-                color
-                ? "Your favourite colour is <strong>" + color + "</strong>. 🎨"
-                : "I don't have your favourite colour saved yet. 🎨"
-            }
-
-        </div>
-    `;
-
-    chat.scrollTop = chat.scrollHeight;
-
-    return;
-}
-
-
-// FOOD
-
-if(
-    lowerText.includes("what is my favourite food") ||
-    lowerText.includes("what is my favorite food")
-){
-
-    const food =
-        personalMemory.favoriteFood ||
-        localStorage.getItem("favoriteFood");
-
-    chat.innerHTML += `
-        <div class="ai-message">
-
-            ${
-                food
-                ? "Your favourite food is <strong>" + food + "</strong>. 🍽️"
-                : "I don't have your favourite food saved yet. 🍽️"
-            }
-
-        </div>
-    `;
-
-    chat.scrollTop = chat.scrollHeight;
-
-    return;
-}
-
-
-// BIRTHDAY
-
-if(
-    lowerText.includes("when is my birthday") ||
-    lowerText.includes("what is my birthday") ||
-    lowerText.includes("what's my birthday") ||
-    lowerText.includes("do you remember my birthday")
-){
-
-    const birthday =
-        personalMemory.birthday ||
-        localStorage.getItem("birthday");
-
-    chat.innerHTML += `
-        <div class="ai-message">
-
-            ${
-                birthday
-                ? "Your birthday is <strong>" + birthday + "</strong>. 🎂🎉"
-                : "I don't have your birthday saved yet. 🎂"
-            }
-
-        </div>
-    `;
-
-    chat.scrollTop = chat.scrollHeight;
-
-    return;
-}
-
-
-// HOBBY
-
-if(
-    lowerText === "what is my hobby" ||
-    lowerText === "what's my hobby"
-){
-
-    const hobby =
-        personalMemory.hobby ||
-        localStorage.getItem("hobby");
-
-    chat.innerHTML += `
-        <div class="ai-message">
-
-            ${
-                hobby
-                ? "Your hobby is <strong>" + hobby + "</strong>. 🎯"
-                : "I don't have your hobby saved yet. 🎯"
-            }
-
-        </div>
-    `;
-
-    chat.scrollTop = chat.scrollHeight;
-
-    return;
-}
-
-
-// LOCATION
-
-if(
-    lowerText === "where do i live" ||
-    lowerText === "what is my location"
-){
-
-    const location =
-        personalMemory.location ||
-        localStorage.getItem("userCity");
-
-    chat.innerHTML += `
-        <div class="ai-message">
-
-            ${
-                location
-                ? "You live in <strong>" + location + "</strong>. 📍"
-                : "I don't have your location saved yet. 📍"
-            }
-
-        </div>
-    `;
-
-    chat.scrollTop = chat.scrollHeight;
-
-    return;
-}
-
-
-// ANIMAL
-
-if(
-    lowerText.includes("what is my favourite animal") ||
-    lowerText.includes("what is my favorite animal")
-){
-
-    const animal =
-        personalMemory.favoriteAnimal ||
-        localStorage.getItem("favoriteAnimal");
-
-    chat.innerHTML += `
-        <div class="ai-message">
-
-            ${
-                animal
-                ? "Your favourite animal is <strong>" + animal + "</strong>. 🐾"
-                : "I don't have your favourite animal saved yet. 🐾"
-            }
-
-        </div>
-    `;
-
-    chat.scrollTop = chat.scrollHeight;
-
-    return;
-}
-
-
-// FOOTBALL TEAM
-
-if(
-    lowerText.includes("what is my favourite football team") ||
-    lowerText.includes("what is my favorite football team") ||
-    lowerText.includes("what football team do i support") ||
-    lowerText.includes("which football team do i support") ||
-    lowerText.includes("what team do i support")
-){
-
-    const team =
-        personalMemory.favoriteFootballTeam ||
-        localStorage.getItem("favoriteFootballTeam");
-
-    chat.innerHTML += `
-        <div class="ai-message">
-
-            ${
-                team
-                ? "Your favourite football team is <strong>" + team + "</strong>. ⚽"
-                : "I don't have your favourite football team saved yet. ⚽"
-            }
-
-        </div>
-    `;
-
-    chat.scrollTop = chat.scrollHeight;
-
-    return;
-                                }
     // Remember user's message
     lastUserMessage = userText;
 
