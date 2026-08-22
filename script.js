@@ -375,7 +375,7 @@ if(
         <br><br>
 
         <button
-            onclick="document.getElementById('userInput').value='forget my ${label.replace(':','')}'; sendMessage();"
+            onclick="document.getElementById('userInput').value='forget memory ${key}'; sendMessage();"
             style="
                 padding:8px 14px;
                 border:none;
@@ -514,6 +514,74 @@ if(
         return;
     }
 }
+    // =====================================
+// FORGET MEMORY BY INTERNAL KEY
+// =====================================
+
+if(lowerText.startsWith("forget memory ")){
+
+    const memoryKey = lowerText
+        .substring(14)
+        .trim();
+
+    const memories = getAllPersonalMemory();
+
+    if(memories[memoryKey]){
+
+        delete memories[memoryKey];
+
+        localStorage.setItem(
+            "personalMemory",
+            JSON.stringify(memories)
+        );
+
+        // Remove old storage keys too
+        localStorage.removeItem(memoryKey);
+
+        if(memoryKey === "name"){
+            localStorage.removeItem("userName");
+        }
+
+        if(memoryKey === "location"){
+            localStorage.removeItem("userCity");
+        }
+
+        if(memoryKey === "favoriteColor"){
+            localStorage.removeItem("favouriteColor");
+        }
+
+        if(memoryKey === "favoriteFood"){
+            localStorage.removeItem("favouriteFood");
+        }
+
+        if(memoryKey === "favoriteAnimal"){
+            localStorage.removeItem("favouriteAnimal");
+        }
+
+        if(memoryKey === "favoriteFootballTeam"){
+            localStorage.removeItem("favouriteFootballTeam");
+        }
+
+        chat.innerHTML += `
+            <div class="ai-message">
+                🗑️ I've forgotten that memory. 🧠
+            </div>
+        `;
+
+    }else{
+
+        chat.innerHTML += `
+            <div class="ai-message">
+                🧠 I don't have that memory saved.
+            </div>
+        `;
+
+    }
+
+    chat.scrollTop = chat.scrollHeight;
+
+    return;
+            }
     // =====================================
 // LOUIS AI FORGET MEMORY
 // =====================================
