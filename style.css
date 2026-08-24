@@ -109,3 +109,19 @@ button{
 .welcome p{
     margin:10px 0;
 }
+/* Welcome text in Dark Mode */
+.dark .welcome{
+    color:#ffffff;
+}
+
+.dark .welcome h2{
+    color:#008cff;
+}
+
+.dark .welcome p{
+    color:#ffffff;
+}
+
+.dark .welcome small{
+    color:#cccccc;
+    }
