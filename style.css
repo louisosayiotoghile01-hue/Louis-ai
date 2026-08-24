@@ -94,8 +94,18 @@ button{
     font-size: 16px;
 }
 .welcome{
-    text-align: center;
-    font-size: 18px;
-    margin-bottom: 15px;
-    color: #ffffff;
+    text-align:center;
+    font-size:18px;
+    margin-bottom:15px;
+    color:#333;
+}
+
+.welcome h2{
+    font-size:28px;
+    margin:10px 0;
+    color:#007bff;
+}
+
+.welcome p{
+    margin:10px 0;
 }
