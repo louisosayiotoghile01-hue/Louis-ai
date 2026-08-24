@@ -33,6 +33,78 @@ function getAllPersonalMemory(){
     return personalMemory;
 
 }
+// ==========================================
+// 🧠 LOUIS AI FOLLOW-UP & TOPIC MEMORY
+// ==========================================
+
+function rememberConversation(userMessage, aiMessage){
+
+    lastUserMessage = userMessage;
+    lastAIMessage = aiMessage;
+
+    chatMemory.push({
+        user: userMessage,
+        ai: aiMessage,
+        topic: lastTopic,
+        time: new Date().toISOString()
+    });
+
+    if(chatMemory.length > 20){
+        chatMemory.shift();
+    }
+
+    localStorage.setItem(
+        "chatMemory",
+        JSON.stringify(chatMemory)
+    );
+}
+
+function rememberTopic(topic){
+
+    if(!topic) return;
+
+    lastTopic = topic;
+
+    if(
+        topicHistory.length === 0 ||
+        topicHistory[topicHistory.length - 1] !== topic
+    ){
+        topicHistory.push(topic);
+    }
+
+    if(topicHistory.length > 10){
+        topicHistory.shift();
+    }
+}
+
+function getRecentConversation(){
+
+    return chatMemory
+        .slice(-10)
+        .map(function(item){
+
+            return {
+                user: item.user,
+                ai: item.ai,
+                topic: item.topic
+            };
+
+        });
+
+}
+
+function getFollowUpContext(){
+
+    return {
+        lastUserMessage: lastUserMessage,
+        lastAIMessage: lastAIMessage,
+        lastTopic: lastTopic,
+        lastQuestion: lastQuestion,
+        topicHistory: topicHistory.slice(-10),
+        recentConversation: getRecentConversation()
+    };
+
+}
 const synonyms = {
     "js": "javascript",
     "artificial intelligence": "ai",
