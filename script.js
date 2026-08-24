@@ -1598,13 +1598,18 @@ if(
 
     try{
 
-        // Ask the Vercel API
-        const localReply = getReply(userText);
+        // Ask the Vercel AI API first
+let reply = await getAIResponse(userText, conversation);
 
-const reply =
-    typeof localReply === "string" && localReply.trim() !== ""
-        ? localReply
-        : await getAIResponse(userText, conversation);
+// If the AI server fails, use Louis AI's local brain
+if (
+    !reply ||
+    reply.includes("trouble connecting") ||
+    reply.includes("couldn't connect") ||
+    reply.includes("didn't receive a response")
+) {
+    reply = getReply(userText);
+}
         // Remove typing message
         const typing = document.getElementById("typing");
 
