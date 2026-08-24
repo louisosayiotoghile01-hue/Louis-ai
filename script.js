@@ -234,6 +234,7 @@ if(favoriteFootballTeam){
 }
     return memory.join("\n");
 }
+const OPENAI_API_KEY = "";
 async function getAIResponse(message, history = []) {
 
     try {
