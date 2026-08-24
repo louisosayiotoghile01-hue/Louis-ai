@@ -247,20 +247,7 @@ async function getAIResponse(message, history = []) {
                 "Content-Type": "application/json"
             },
 
-            body: JSON.stringify({
 
-    message: message,
-
-    // 🧠 Conversation history
-    history: history,
-
-    // 🧠 Personal memory
-    memory: getAllPersonalMemory(),
-
-    // 🧠 Follow-up and topic memory
-    followUpContext: getFollowUpContext()
-
-})
 
         const data = await response.json();
 
