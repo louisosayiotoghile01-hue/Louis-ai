@@ -671,8 +671,8 @@ const lowerText = userText.toLowerCase();
 if(
     lowerText === "show my memories" ||
     lowerText === "show my memory" ||
-    lowerText === "what do you remember about me" ||
-    lowerText === "what do you know about me"
+    lowerText === "what do you remember" ||
+    lowerText === "what do you know about"
 ){
 
     const memories = getAllPersonalMemory();
@@ -750,8 +750,8 @@ if(
 if(
     lowerText === "forget all my memories" ||
     lowerText === "forget all my memory" ||
-    lowerText === "forget everything you remember about me" ||
-    lowerText === "forget everything about me"
+    lowerText === "forget everything" ||
+    lowerText === "forget everything i told you"
 ){
 
     const memoryKeys = [
