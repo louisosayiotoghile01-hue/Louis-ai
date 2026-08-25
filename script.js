@@ -662,8 +662,6 @@ chat.scrollTop = chat.scrollHeight;
 // Clear input
 input.value = "";
     // Clear the input immediately
-
-const lowerText = userText.toLowerCase();
     // =====================================
 // LOUIS AI MEMORY DASHBOARD
 // =====================================
