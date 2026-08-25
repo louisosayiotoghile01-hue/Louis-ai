@@ -22,11 +22,24 @@ module.exports = async function handler(req, res) {
             ? history.slice(-10)
             : [];
 
-        // Personal memory
-        const personalMemory =
-            memory && typeof memory === "object"
-                ? memory
-                : {};
+        // ==========================================
+// 🧠 PERSONAL + LONG-TERM MEMORY
+// ==========================================
+
+const personalMemory =
+    memory &&
+    typeof memory === "object" &&
+    memory.personal &&
+    typeof memory.personal === "object"
+        ? memory.personal
+        : {};
+
+const longTermMemory =
+    memory &&
+    typeof memory === "object" &&
+    Array.isArray(memory.longTerm)
+        ? memory.longTerm
+        : [];
 
         // Louis AI instructions
         const input = [
