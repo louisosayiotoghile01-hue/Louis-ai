@@ -34,7 +34,11 @@ function getPersonalMemory(key){
 
 function getAllPersonalMemory(){
 
-    return personalMemory;
+    return {
+        personalMemory: personalMemory,
+
+        conversationMemory: chatMemory.slice(-20)
+    };
 
 }
 // ==========================================
