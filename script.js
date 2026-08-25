@@ -23,7 +23,48 @@ function savePersonalMemory(key, value){
         JSON.stringify(personalMemory)
     );
 }
+// ==========================================
+// 🧠 LOUIS AI LONG-TERM MEMORY
+// ==========================================
 
+let longTermMemory =
+    JSON.parse(localStorage.getItem("longTermMemory")) || [];
+
+function saveLongTermMemory(memory){
+
+    if(!memory || typeof memory !== "string"){
+        return;
+    }
+
+    memory = memory.trim();
+
+    if(!memory){
+        return;
+    }
+
+    // Prevent duplicate memories
+    if(longTermMemory.includes(memory)){
+        return;
+    }
+
+    longTermMemory.push(memory);
+
+    // Keep the newest 100 memories
+    if(longTermMemory.length > 100){
+        longTermMemory.shift();
+    }
+
+    localStorage.setItem(
+        "longTermMemory",
+        JSON.stringify(longTermMemory)
+    );
+}
+
+
+function getLongTermMemory(){
+
+    return longTermMemory;
+}
 
 function getPersonalMemory(key){
 
