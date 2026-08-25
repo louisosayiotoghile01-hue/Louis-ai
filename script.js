@@ -1603,7 +1603,7 @@ if(
     try{
 
         // Ask the Vercel AI API first
-let reply = await getAIResponse(userText, conversation);
+let reply = await getAIResponse(userText, getRecentConversation());
 
 // If the AI server fails, use Louis AI's local brain
 if (
