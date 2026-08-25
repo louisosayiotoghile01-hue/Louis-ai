@@ -642,7 +642,11 @@ if(lowerText.startsWith("forget ")){
         return;
     }
 }
-   detectAndSaveLongTermMemory(userText);
+   try {
+    detectAndSaveLongTermMemory(userText);
+} catch(error) {
+    console.error("Memory error:", error);
+}
     // SHOW USER MESSAGE FIRST
 const userMessageDiv = document.createElement("div");
 
