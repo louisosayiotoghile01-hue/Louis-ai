@@ -65,7 +65,77 @@ function getLongTermMemory(){
 
     return longTermMemory;
 }
+// ==========================================
+// 🧠 AUTOMATIC LONG-TERM MEMORY
+// ==========================================
 
+function detectAndSaveLongTermMemory(message){
+
+    if(!message || typeof message !== "string"){
+        return;
+    }
+
+    const text = message.trim();
+
+    // Explicit "remember" requests
+    if(
+        text.toLowerCase().startsWith("remember that ") ||
+        text.toLowerCase().startsWith("remember ")
+    ){
+
+        let memory = text
+            .replace(/^remember that /i, "")
+            .replace(/^remember /i, "")
+            .trim();
+
+        if(memory){
+            saveLongTermMemory(memory);
+        }
+
+        return;
+    }
+
+    // Favourite information
+    const favouriteMatch = text.match(
+        /^my favourite (.+?) is (.+)$/i
+    );
+
+    if(favouriteMatch){
+
+        const type = favouriteMatch[1].trim();
+        const value = favouriteMatch[2].trim();
+
+        saveLongTermMemory(
+            `The user's favourite ${type} is ${value}.`
+        );
+
+        return;
+    }
+
+    // "My ... is ..." information
+    const personalMatch = text.match(
+        /^my (.+?) is (.+)$/i
+    );
+
+    if(personalMatch){
+
+        const type = personalMatch[1].trim();
+        const value = personalMatch[2].trim();
+
+        // Avoid saving questions as memories
+        if(
+            value &&
+            !value.endsWith("?") &&
+            type.length < 50 &&
+            value.length < 200
+        ){
+
+            saveLongTermMemory(
+                `The user's ${type} is ${value}.`
+            );
+        }
+    }
+}
 function getPersonalMemory(key){
 
     return personalMemory[key] || null;
