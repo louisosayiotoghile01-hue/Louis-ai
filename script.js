@@ -508,6 +508,7 @@ async function sendMessage(){
 if(userText === ""){
     return;
 }
+   detectAndSaveLongTermMemory(userText);
     // SHOW USER MESSAGE FIRST
 const userMessageDiv = document.createElement("div");
 
