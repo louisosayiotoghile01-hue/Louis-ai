@@ -4,6 +4,10 @@ let lastTopic = "";
 let lastQuestion = "";
 let topicHistory = [];
 let conversation = JSON.parse(localStorage.getItem("conversation")) || [];
+// Louis AI conversation memory
+function getRecentConversation() {
+    return conversation.slice(-20);
+}
 let learnedFacts = JSON.parse(localStorage.getItem("learnedFacts")) || {};
 let notes = JSON.parse(localStorage.getItem("notes")) || [];
 let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
