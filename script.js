@@ -370,7 +370,10 @@ async function getAIResponse(message, history = []) {
                 history: history,
 
                 // Send Louis AI's personal memory
-                memory: getAllPersonalMemory()
+                memory: {
+    personal: getAllPersonalMemory(),
+    longTerm: getLongTermMemory()
+}
 
             })
 
