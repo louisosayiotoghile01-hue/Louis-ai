@@ -501,6 +501,79 @@ function getLongTermMemory(){
         localStorage.getItem("longTermMemory")
     ) || [];
 }
+// ==========================================
+// 🧠 LOUIS AI MEMORY CONTROL
+// ==========================================
+
+function showLongTermMemory(){
+
+    const memories = getLongTermMemory();
+
+    if(!Array.isArray(memories) || memories.length === 0){
+        return "I don't have any long-term memories saved about you yet.";
+    }
+
+    let reply = "Here is what I remember about you:\n\n";
+
+    memories.forEach((memory, index) => {
+
+        if(typeof memory === "string"){
+            reply += `${index + 1}. ${memory}\n`;
+            return;
+        }
+
+        if(memory && typeof memory === "object"){
+
+            const key = memory.key || memory.type || memory.category || "Memory";
+            const value = memory.value || memory.text || memory.memory || "";
+
+            if(value){
+                reply += `${index + 1}. ${key}: ${value}\n`;
+            }
+        }
+    });
+
+    return reply.trim();
+}
+
+
+function forgetLongTermMemory(searchText){
+
+    let memories = getLongTermMemory();
+
+    if(!Array.isArray(memories) || memories.length === 0){
+        return "I don't have any long-term memories saved.";
+    }
+
+    const search = searchText
+        .toLowerCase()
+        .trim();
+
+    const originalLength = memories.length;
+
+    memories = memories.filter(memory => {
+
+        const memoryText =
+            typeof memory === "string"
+                ? memory
+                : JSON.stringify(memory);
+
+        return !memoryText
+            .toLowerCase()
+            .includes(search);
+    });
+
+    if(memories.length === originalLength){
+        return `I couldn't find a saved memory matching "${searchText}".`;
+    }
+
+    localStorage.setItem(
+        "longTermMemory",
+        JSON.stringify(memories)
+    );
+
+    return `I've forgotten the memory matching "${searchText}".`;
+}
 async function sendMessage(){
 
     const input = document.getElementById("userInput");
@@ -510,6 +583,64 @@ async function sendMessage(){
 
 if(userText === ""){
     return;
+}
+    // ==========================================
+// 🧠 MEMORY CONTROL COMMANDS
+// ==========================================
+
+const lowerText = userText.toLowerCase();
+
+if(
+    lowerText === "what do you remember about me" ||
+    lowerText === "what do you remember about me?" ||
+    lowerText === "what do you remember" ||
+    lowerText === "show my memories" ||
+    lowerText === "show what you remember"
+){
+
+    const memoryReply = showLongTermMemory();
+
+    const aiMemoryDiv = document.createElement("div");
+
+    aiMemoryDiv.className = "ai-message";
+
+    aiMemoryDiv.textContent = memoryReply;
+
+    chat.appendChild(aiMemoryDiv);
+
+    chat.scrollTop = chat.scrollHeight;
+
+    input.value = "";
+
+    return;
+}
+
+
+if(lowerText.startsWith("forget ")){
+
+    const memoryToForget =
+        userText.substring(7).trim();
+
+    if(memoryToForget){
+
+        const forgetReply =
+            forgetLongTermMemory(memoryToForget);
+
+        const aiForgetDiv =
+            document.createElement("div");
+
+        aiForgetDiv.className = "ai-message";
+
+        aiForgetDiv.textContent = forgetReply;
+
+        chat.appendChild(aiForgetDiv);
+
+        chat.scrollTop = chat.scrollHeight;
+
+        input.value = "";
+
+        return;
+    }
 }
    detectAndSaveLongTermMemory(userText);
     // SHOW USER MESSAGE FIRST
