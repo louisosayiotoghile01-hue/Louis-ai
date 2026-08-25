@@ -225,7 +225,21 @@ Remember that the goal is to make Louis AI feel like a helpful personal assistan
             });
 
         }
+// ==========================================
+// 🧠 ADD LONG-TERM MEMORY
+// ==========================================
 
+if (longTermMemory.length > 0) {
+
+    input.push({
+        role: "developer",
+
+        content:
+            "Saved long-term memories about the user:\n" +
+            JSON.stringify(longTermMemory)
+    });
+
+}
         // Add recent conversation
         for (const item of conversation) {
 
