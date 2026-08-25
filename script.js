@@ -1,4 +1,3 @@
-alert("script.js loaded");
 let lastUserMessage = "";
 let lastAIMessage = "";
 let lastTopic = "";
