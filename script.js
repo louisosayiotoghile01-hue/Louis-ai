@@ -32,6 +32,32 @@ let longTermMemory =
 
 function saveLongTermMemory(memory){
 
+    if(!memory || typeof memory !== "string"){
+        return;
+    }
+
+    memory = memory.trim();
+
+    if(!memory){
+        return;
+    }
+
+    if(longTermMemory.includes(memory)){
+        return;
+    }
+
+    longTermMemory.push(memory);
+
+    if(longTermMemory.length > 100){
+        longTermMemory.shift();
+    }
+
+    localStorage.setItem(
+        "longTermMemory",
+        JSON.stringify(longTermMemory)
+    );
+}
+
 function getLongTermMemory(){
 
     return longTermMemory;
