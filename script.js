@@ -98,10 +98,6 @@ function saveLongTermMemory(memory){
     return "I'll remember that. 🧠";
 }
 
-function getLongTermMemory(){
-
-    return longTermMemory;
-}
 // ==========================================
 // 🧠 AUTOMATIC LONG-TERM MEMORY
 // ==========================================
