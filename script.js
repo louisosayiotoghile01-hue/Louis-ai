@@ -97,11 +97,6 @@ function saveLongTermMemory(memory){
 
     return "I'll remember that. 🧠";
 }
-
-function getLongTermMemory(){
-
-    return longTermMemory;
-}
 // ==========================================
 // 🧠 AUTOMATIC LONG-TERM MEMORY
 // ==========================================
@@ -568,9 +563,58 @@ function cleanDuplicateLongTermMemories(){
 cleanDuplicateLongTermMemories();
 function getLongTermMemory(){
 
-    return JSON.parse(
+    const memories = JSON.parse(
         localStorage.getItem("longTermMemory")
     ) || [];
+
+    if(memories.length === 0){
+        return "🧠 I don't have any long-term memories yet.";
+    }
+
+    let result = "🧠 Here is what I remember about you:\n\n";
+
+    memories.forEach(function(item, index){
+
+        if(!item || !item.memory){
+            return;
+        }
+
+        let memory = item.memory.trim();
+
+        // Remove old "Memory:" wording
+        memory = memory.replace(/^Memory:\s*/i, "");
+
+        // Improve some stored sentences
+        memory = memory.replace(
+            /^The user's favourite /i,
+            "Your favourite "
+        );
+
+        memory = memory.replace(
+            /^The user's favorite /i,
+            "Your favorite "
+        );
+
+        memory = memory.replace(
+            /^The user is /i,
+            "You are "
+        );
+
+        memory = memory.replace(
+            /^The user /i,
+            "You "
+        );
+
+        result += (index + 1) + ". " + memory;
+
+        if(!/[.!?]$/.test(memory)){
+            result += ".";
+        }
+
+        result += "\n";
+    });
+
+    return result.trim();
 }
 // ==========================================
 // 🧠 LOUIS AI MEMORY CONTROL
