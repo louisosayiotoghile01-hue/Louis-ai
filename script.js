@@ -469,41 +469,58 @@ function cleanDuplicateLongTermMemories(){
     const uniqueMemories = [];
     const seen = new Set();
 
+    // Go from newest to oldest
+    memories.reverse();
+
     memories.forEach(function(item){
 
-        if(!item){
+        if(!item || !item.memory){
             return;
         }
 
-        // Support both old object memories and new string memories
-        const memoryText =
-            typeof item === "string"
-                ? item
-                : item.memory;
+        let cleanText = String(item.memory).trim();
 
-        if(!memoryText){
-            return;
-        }
+        // Fix corrupted memories such as:
+        // "y favorite color is blue"
+        // "y name is Louis"
+        cleanText = cleanText.replace(/^y\s+/i, "my ");
 
-        const key = memoryText
-            .trim()
-            .toLowerCase();
+        // Remove repeated spaces
+        cleanText = cleanText.replace(/\s+/g, " ");
 
+        // Remove repeated punctuation at the end
+        cleanText = cleanText.replace(/[.]+$/, ".");
+
+        // Create a comparison key
+        const key = cleanText
+            .toLowerCase()
+            .replace(/\s+/g, " ")
+            .trim();
+
+        // Skip duplicates
         if(!seen.has(key)){
 
             seen.add(key);
-            uniqueMemories.push(item);
 
+            uniqueMemories.push({
+                memory: cleanText,
+                date: item.date || new Date().toISOString()
+            });
         }
 
     });
 
+    // Put memories back in oldest → newest order
+    uniqueMemories.reverse();
+
+    // Keep only the latest 50
+    const finalMemories = uniqueMemories.slice(-50);
+
     localStorage.setItem(
         "longTermMemory",
-        JSON.stringify(uniqueMemories)
+        JSON.stringify(finalMemories)
     );
 }
-
 cleanDuplicateLongTermMemories();
 function getLongTermMemory(){
 
