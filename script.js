@@ -572,55 +572,6 @@ function getLongTermMemory(){
         localStorage.getItem("longTermMemory")
     ) || [];
 }
-if(memories.length === 0){
-        return "🧠 I don't have any long-term memories yet.";
-    }
-
-    let result = "🧠 Here is what I remember about you:\n\n";
-
-    memories.forEach(function(item, index){
-
-        if(!item || !item.memory){
-            return;
-        }
-
-        let memory = item.memory.trim();
-
-        // Remove old "Memory:" wording
-        memory = memory.replace(/^Memory:\s*/i, "");
-
-        // Improve some stored sentences
-        memory = memory.replace(
-            /^The user's favourite /i,
-            "Your favourite "
-        );
-
-        memory = memory.replace(
-            /^The user's favorite /i,
-            "Your favorite "
-        );
-
-        memory = memory.replace(
-            /^The user is /i,
-            "You are "
-        );
-
-        memory = memory.replace(
-            /^The user /i,
-            "You "
-        );
-
-        result += (index + 1) + ". " + memory;
-
-        if(!/[.!?]$/.test(memory)){
-            result += ".";
-        }
-
-        result += "\n";
-    });
-
-    return result.trim();
-}
 // ==========================================
 // 🧠 LOUIS AI MEMORY CONTROL
 // ==========================================
@@ -630,54 +581,33 @@ function showLongTermMemory(){
     const memories = getLongTermMemory();
 
     if(!Array.isArray(memories) || memories.length === 0){
-
-        return "🧠 I don't have any long-term memories yet.";
-
+        return "I don't have any long-term memories saved about you yet.";
     }
 
-    let result = "🧠 Here is what I remember about you:\n\n";
+    let reply = "Here is what I remember about you:\n\n";
 
-    memories.forEach(function(item, index){
+    memories.forEach((memory, index) => {
 
-        if(!item || !item.memory){
+        if(typeof memory === "string"){
+            reply += `${index + 1}. ${memory}\n`;
             return;
         }
 
-        let memory = item.memory.trim();
+        if(memory && typeof memory === "object"){
 
-        memory = memory.replace(/^Memory:\s*/i, "");
+            const key = memory.key || memory.type || memory.category || "Memory";
+            const value = memory.value || memory.text || memory.memory || "";
 
-        memory = memory.replace(
-            /^The user's favourite /i,
-            "Your favourite "
-        );
-
-        memory = memory.replace(
-            /^The user's favorite /i,
-            "Your favorite "
-        );
-
-        memory = memory.replace(
-            /^The user is /i,
-            "You are "
-        );
-
-        memory = memory.replace(
-            /^The user /i,
-            "You "
-        );
-
-        result += (index + 1) + ". " + memory;
-
-        if(!/[.!?]$/.test(memory)){
-            result += ".";
+            if(value){
+                reply += `${index + 1}. ${key}: ${value}\n`;
+            }
         }
-
-        result += "\n";
     });
 
-    return result.trim();
+    return reply.trim();
 }
+
+
 function forgetLongTermMemory(searchText){
 
     let memories = getLongTermMemory();
