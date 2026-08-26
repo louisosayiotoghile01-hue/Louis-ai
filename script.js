@@ -596,7 +596,14 @@ if(
     lowerText === "show my memories" ||
     lowerText === "show what you remember"
 ){
+const userMemoryDiv = document.createElement("div");
 
+userMemoryDiv.className = "user-message";
+
+userMemoryDiv.textContent = userText;
+
+chat.appendChild(userMemoryDiv);
+    
     const memoryReply = showLongTermMemory();
 
     const aiMemoryDiv = document.createElement("div");
