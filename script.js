@@ -509,9 +509,6 @@ function cleanDuplicateLongTermMemories(){
     const uniqueMemories = [];
     const seen = new Set();
 
-    // Go from newest to oldest
-    memories.reverse();
-
     memories.forEach(function(item){
 
         if(!item || !item.memory){
@@ -520,24 +517,34 @@ function cleanDuplicateLongTermMemories(){
 
         let cleanText = String(item.memory).trim();
 
-        // Fix corrupted memories such as:
-        // "y favorite color is blue"
-        // "y name is Louis"
+        // Fix corrupted "y" memories
         cleanText = cleanText.replace(/^y\s+/i, "my ");
 
-        // Remove repeated spaces
-        cleanText = cleanText.replace(/\s+/g, " ");
+        // Fix "am building Louis AI"
+        cleanText = cleanText.replace(
+            /^am building louis ai\.?$/i,
+            "I am building Louis AI."
+        );
 
-        // Remove repeated punctuation at the end
-        cleanText = cleanText.replace(/[.]+$/, ".");
+        // Make favourite/favorite consistent
+        cleanText = cleanText.replace(
+            /\bfavourite\b/gi,
+            "favorite"
+        );
 
-        // Create a comparison key
+        // Remove extra spaces
+        cleanText = cleanText.replace(/\s+/g, " ").trim();
+
+        // Remove repeated dots
+        cleanText = cleanText.replace(/\.+$/, ".");
+
+        // Create duplicate-check key
         const key = cleanText
             .toLowerCase()
+            .replace(/[.!?]+$/, "")
             .replace(/\s+/g, " ")
             .trim();
 
-        // Skip duplicates
         if(!seen.has(key)){
 
             seen.add(key);
@@ -550,10 +557,7 @@ function cleanDuplicateLongTermMemories(){
 
     });
 
-    // Put memories back in oldest → newest order
-    uniqueMemories.reverse();
-
-    // Keep only the latest 50
+    // Keep latest 50
     const finalMemories = uniqueMemories.slice(-50);
 
     localStorage.setItem(
