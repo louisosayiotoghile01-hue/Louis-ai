@@ -471,11 +471,23 @@ function cleanDuplicateLongTermMemories(){
 
     memories.forEach(function(item){
 
-        if(!item || !item.memory){
+        if(!item){
             return;
         }
 
-        const key = item.memory.trim().toLowerCase();
+        // Support both old object memories and new string memories
+        const memoryText =
+            typeof item === "string"
+                ? item
+                : item.memory;
+
+        if(!memoryText){
+            return;
+        }
+
+        const key = memoryText
+            .trim()
+            .toLowerCase();
 
         if(!seen.has(key)){
 
@@ -490,7 +502,8 @@ function cleanDuplicateLongTermMemories(){
         "longTermMemory",
         JSON.stringify(uniqueMemories)
     );
-                }
+}
+
 cleanDuplicateLongTermMemories();
 function getLongTermMemory(){
 
