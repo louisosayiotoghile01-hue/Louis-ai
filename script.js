@@ -572,7 +572,6 @@ function forgetLongTermMemory(searchText){
     return `I've forgotten the memory matching "${searchText}".`;
 }
 async function sendMessage(){
-    alert("sendMessage is working");
     const input = document.getElementById("userInput");
     const chat = document.getElementById("chat");
 
