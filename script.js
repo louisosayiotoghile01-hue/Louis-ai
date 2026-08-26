@@ -32,30 +32,70 @@ let longTermMemory =
 
 function saveLongTermMemory(memory){
 
-    if(!memory || typeof memory !== "string"){
-        return;
-    }
-
-    memory = memory.trim();
-
     if(!memory){
         return;
     }
 
-    if(longTermMemory.includes(memory)){
-        return;
+    let cleanText = String(memory).trim();
+
+    // Fix corrupted memories
+    cleanText = cleanText.replace(/^y\s+/i, "my ");
+    cleanText = cleanText.replace(/^am building louis ai$/i, "I am building Louis AI");
+
+    // Clean extra spaces
+    cleanText = cleanText.replace(/\s+/g, " ");
+
+    // Remove unnecessary repeated full stops
+    cleanText = cleanText.replace(/\.+$/, ".");
+
+    const newKey = cleanText
+        .toLowerCase()
+        .replace(/[.!?]+$/, "")
+        .replace(/\s+/g, " ")
+        .trim();
+
+    let memories = JSON.parse(
+        localStorage.getItem("longTermMemory")
+    ) || [];
+
+    // Check if this memory already exists
+    const alreadyExists = memories.some(function(item){
+
+        if(!item || !item.memory){
+            return false;
+        }
+
+        let existingText = String(item.memory)
+            .trim()
+            .replace(/^y\s+/i, "my ")
+            .replace(/[.!?]+$/, "")
+            .replace(/\s+/g, " ")
+            .toLowerCase();
+
+        return existingText === newKey;
+    });
+
+    // Don't save duplicates
+    if(alreadyExists){
+        return "I already remember that. 🧠";
     }
 
-    longTermMemory.push(memory);
+    memories.push({
+        memory: cleanText,
+        date: new Date().toISOString()
+    });
 
-    if(longTermMemory.length > 100){
-        longTermMemory.shift();
+    // Keep only the latest 50 memories
+    if(memories.length > 50){
+        memories = memories.slice(-50);
     }
 
     localStorage.setItem(
         "longTermMemory",
-        JSON.stringify(longTermMemory)
+        JSON.stringify(memories)
     );
+
+    return "I'll remember that. 🧠";
 }
 
 function getLongTermMemory(){
