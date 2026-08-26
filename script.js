@@ -630,33 +630,54 @@ function showLongTermMemory(){
     const memories = getLongTermMemory();
 
     if(!Array.isArray(memories) || memories.length === 0){
-        return "I don't have any long-term memories saved about you yet.";
+
+        return "🧠 I don't have any long-term memories yet.";
+
     }
 
-    let reply = "Here is what I remember about you:\n\n";
+    let result = "🧠 Here is what I remember about you:\n\n";
 
-    memories.forEach((memory, index) => {
+    memories.forEach(function(item, index){
 
-        if(typeof memory === "string"){
-            reply += `${index + 1}. ${memory}\n`;
+        if(!item || !item.memory){
             return;
         }
 
-        if(memory && typeof memory === "object"){
+        let memory = item.memory.trim();
 
-            const key = memory.key || memory.type || memory.category || "Memory";
-            const value = memory.value || memory.text || memory.memory || "";
+        memory = memory.replace(/^Memory:\s*/i, "");
 
-            if(value){
-                reply += `${index + 1}. ${key}: ${value}\n`;
-            }
+        memory = memory.replace(
+            /^The user's favourite /i,
+            "Your favourite "
+        );
+
+        memory = memory.replace(
+            /^The user's favorite /i,
+            "Your favorite "
+        );
+
+        memory = memory.replace(
+            /^The user is /i,
+            "You are "
+        );
+
+        memory = memory.replace(
+            /^The user /i,
+            "You "
+        );
+
+        result += (index + 1) + ". " + memory;
+
+        if(!/[.!?]$/.test(memory)){
+            result += ".";
         }
+
+        result += "\n";
     });
 
-    return reply.trim();
+    return result.trim();
 }
-
-
 function forgetLongTermMemory(searchText){
 
     let memories = getLongTermMemory();
