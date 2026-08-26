@@ -568,11 +568,11 @@ function cleanDuplicateLongTermMemories(){
 cleanDuplicateLongTermMemories();
 function getLongTermMemory(){
 
-    const memories = JSON.parse(
+    return JSON.parse(
         localStorage.getItem("longTermMemory")
     ) || [];
-
-    if(memories.length === 0){
+}
+if(memories.length === 0){
         return "🧠 I don't have any long-term memories yet.";
     }
 
