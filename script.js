@@ -2816,6 +2816,21 @@ if(text.includes("help") || text.includes("commands")){
 - Listen to your voice`;
 
 }
+    // 🧠 FOLLOW-UP QUESTION UNDERSTANDING
+
+if(
+    text === "what am i building" ||
+    text === "what are we building" ||
+    text === "what is my project" ||
+    text === "what project am i working on"
+){
+
+    if(lastTopic){
+        return "You are building " + lastTopic + ". 🧠";
+    }
+
+    return "I remember that you are working on a project, but I don't know the current project name yet.";
+}
 if(text.includes("what were we talking about") ||
    text.includes("what is the topic")){
 
