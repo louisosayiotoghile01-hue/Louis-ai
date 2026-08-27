@@ -2218,12 +2218,66 @@ function getConversationContext(){
 
     return context.trim();
 }
+function handleContextReference(text){
+
+    const lowerText = text.toLowerCase().trim();
+
+    if(!lastTopic){
+        return null;
+    }
+
+    const hasReference =
+        lowerText.includes(" it ") ||
+        lowerText.endsWith(" it") ||
+        lowerText.startsWith("it ") ||
+        lowerText.includes(" that ") ||
+        lowerText.endsWith(" that") ||
+        lowerText.startsWith("that ") ||
+        lowerText.includes(" this ") ||
+        lowerText.endsWith(" this") ||
+        lowerText.startsWith("this ");
+
+    if(!hasReference){
+        return null;
+    }
+
+    if(
+        lowerText.includes("tell me more") ||
+        lowerText.includes("more about")
+    ){
+        return "Sure! We were talking about " + lastTopic + ". What would you like to know about it?";
+    }
+
+    if(
+        lowerText.includes("how can i improve") ||
+        lowerText.includes("how do i improve") ||
+        lowerText.includes("how can i make it better")
+    ){
+        return "We are talking about " + lastTopic + ". You can improve it by adding useful features, better responses, reliable memory, and a better user experience.";
+    }
+
+    if(
+        lowerText.includes("help me with") ||
+        lowerText.includes("help with")
+    ){
+        return "Of course! I understand that you mean " + lastTopic + ". Tell me what part you want help with.";
+    }
+
+    return "I understand that you are referring to " + lastTopic + ".";
+}
 function getReply(userText){
 
     let text = userText.toLowerCase();
     // 🧠 Use recent conversation context
 const conversationContext = getConversationContext();
-    lastQuestion = text;
+
+const contextReply = handleContextReference(text);
+
+if(contextReply){
+    return contextReply;
+}
+
+lastQuestion = text;
     let intent = detectIntent(text);
     if(text.startsWith("rename category:")){
 
