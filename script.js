@@ -2382,6 +2382,74 @@ function getNaturalFollowUp(text){
 
     return null;
 }
+// 🧠 SMART TOPIC FOLLOW-UP
+function getTopicFollowUp(text){
+
+    if(!lastTopic){
+        return null;
+    }
+
+    const followUpPhrases = [
+        "tell me more",
+        "tell me more about it",
+        "explain that",
+        "explain more",
+        "continue",
+        "go on",
+        "what else",
+        "what else do you know",
+        "can you explain",
+        "explain it",
+        "how does it work",
+        "how does that work",
+        "why is that",
+        "why is it",
+        "what do you mean",
+        "say more"
+    ];
+
+    let isFollowUp = false;
+
+    for(let phrase of followUpPhrases){
+
+        if(text.includes(phrase)){
+            isFollowUp = true;
+            break;
+        }
+    }
+
+    if(!isFollowUp){
+        return null;
+    }
+
+    // 🔎 Look for the previous topic inside Louis AI's knowledge
+    for(let category in knowledge){
+
+        if(!knowledge[category]){
+            continue;
+        }
+
+        for(let key in knowledge[category]){
+
+            const topicKey = key.toLowerCase();
+            const topic = lastTopic.toLowerCase();
+
+            if(
+                topic.includes(topicKey) ||
+                topicKey.includes(topic)
+            ){
+
+                return knowledge[category][key];
+            }
+        }
+    }
+
+    // 🧠 If no stored answer is found,
+    // keep the previous topic in the conversation
+    return "Sure. We were talking about " +
+           lastTopic +
+           ". Tell me what part of it you would like me to explain further.";
+}
 function getReply(userText){
 
     let text = userText.toLowerCase();
@@ -2401,6 +2469,12 @@ const naturalFollowUp = getNaturalFollowUp(text);
 
 if(naturalFollowUp){
     return naturalFollowUp;
+}
+    // 🧠 CHECK PREVIOUS TOPIC
+const topicFollowUp = getTopicFollowUp(text);
+
+if(topicFollowUp){
+    return topicFollowUp;
 }
     if(text.startsWith("rename category:")){
 
