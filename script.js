@@ -2191,9 +2191,38 @@ function handleMemory(text, userText){
 
     return null;
 }
+// 🧠 CONVERSATION CONTEXT MEMORY
+function getConversationContext(){
+
+    if(!Array.isArray(chatMemory) || chatMemory.length === 0){
+        return "";
+    }
+
+    let context = "";
+
+    chatMemory.slice(-10).forEach(function(item){
+
+        if(typeof item === "string"){
+            context += item + "\n";
+        }
+
+        else if(item && item.message){
+            context += item.message + "\n";
+        }
+
+        else if(item && item.text){
+            context += item.text + "\n";
+        }
+
+    });
+
+    return context.trim();
+}
 function getReply(userText){
 
     let text = userText.toLowerCase();
+    // 🧠 Use recent conversation context
+const conversationContext = getConversationContext();
     lastQuestion = text;
     let intent = detectIntent(text);
     if(text.startsWith("rename category:")){
