@@ -2265,6 +2265,123 @@ function handleContextReference(text){
 
     return "I understand that you are referring to " + lastTopic + ".";
 }
+// 🧠 NATURAL FOLLOW-UP CONVERSATION
+function getNaturalFollowUp(text){
+
+    // Favourite colour
+    if(
+        text.includes("what about my favourite colour") ||
+        text.includes("what about my favorite color") ||
+        text.includes("and my favourite colour") ||
+        text.includes("and my favorite color")
+    ){
+
+        const memories = getAllPersonalMemory();
+
+        if(memories.favoriteColor){
+            return "Your favourite colour is " + memories.favoriteColor + ".";
+        }
+
+        return "I don't have your favourite colour saved yet.";
+    }
+
+
+    // Favourite food
+    if(
+        text.includes("what about my favourite food") ||
+        text.includes("what about my favorite food") ||
+        text.includes("and my favourite food") ||
+        text.includes("and my favorite food")
+    ){
+
+        const memories = getAllPersonalMemory();
+
+        if(memories.favoriteFood){
+            return "Your favourite food is " + memories.favoriteFood + ".";
+        }
+
+        if(memories.favouriteFood){
+            return "Your favourite food is " + memories.favouriteFood + ".";
+        }
+
+        return "I don't have your favourite food saved yet.";
+    }
+
+
+    // Name
+    if(
+        text.includes("what about my name") ||
+        text.includes("and my name")
+    ){
+
+        const memories = getAllPersonalMemory();
+
+        if(memories.name){
+            return "Your name is " + memories.name + ".";
+        }
+
+        return "I don't have your name saved yet.";
+    }
+
+
+    // Hobby
+    if(
+        text.includes("what about my hobby") ||
+        text.includes("and my hobby")
+    ){
+
+        const memories = getAllPersonalMemory();
+
+        if(memories.hobby){
+            return "Your hobby is " + memories.hobby + ".";
+        }
+
+        return "I don't have your hobby saved yet.";
+    }
+
+
+    // Birthday
+    if(
+        text.includes("what about my birthday") ||
+        text.includes("and my birthday")
+    ){
+
+        const memories = getAllPersonalMemory();
+
+        if(memories.birthday){
+            return "Your birthday is " + memories.birthday + ".";
+        }
+
+        return "I don't have your birthday saved yet.";
+    }
+
+
+    // Favourite football team
+    if(
+        text.includes("what about my favourite football team") ||
+        text.includes("what about my favorite football team") ||
+        text.includes("and my favourite football team") ||
+        text.includes("and my favorite football team")
+    ){
+
+        const memories = getAllPersonalMemory();
+
+        if(memories.favoriteFootballTeam){
+            return "Your favourite football team is " +
+                   memories.favoriteFootballTeam + ".";
+        }
+
+        if(memories.favouriteFootballTeam){
+            return "Your favourite football team is " +
+                   memories.favouriteFootballTeam + ".";
+        }
+
+        return "I don't have your favourite football team saved yet.";
+    }
+
+
+    return null;
+}
 function getReply(userText){
 
     let text = userText.toLowerCase();
@@ -2279,6 +2396,12 @@ if(contextReply){
 
 lastQuestion = text;
     let intent = detectIntent(text);
+    // 🧠 CHECK NATURAL FOLLOW-UP QUESTIONS
+const naturalFollowUp = getNaturalFollowUp(text);
+
+if(naturalFollowUp){
+    return naturalFollowUp;
+}
     if(text.startsWith("rename category:")){
 
     let command = userText.substring(16).trim();
