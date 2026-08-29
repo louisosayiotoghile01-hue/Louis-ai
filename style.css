@@ -211,3 +211,66 @@ button{
     background:#008cff;
     color:white;
 }
+
+/* MODERN INPUT AREA */
+
+#userInput{
+    width:100%;
+    padding:14px 16px;
+    font-size:16px;
+    border:1px solid #ddd;
+    border-radius:12px;
+    outline:none;
+    box-sizing:border-box;
+    transition:0.2s;
+}
+
+#userInput:focus{
+    border-color:#007bff;
+    box-shadow:0 0 0 3px rgba(0,123,255,0.12);
+}
+
+/* SEND BUTTON */
+
+button{
+    border:none;
+    border-radius:12px;
+    padding:12px 16px;
+    font-size:15px;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+button:hover{
+    transform:translateY(-1px);
+}
+
+button:active{
+    transform:scale(0.98);
+}
+
+/* MOBILE INPUT SPACING */
+
+@media(max-width:600px){
+
+    #userInput{
+        padding:13px;
+        font-size:16px;
+    }
+
+    button{
+        padding:11px 13px;
+    }
+}
+
+/* DARK MODE INPUT */
+
+.dark #userInput{
+    background:#333;
+    color:white;
+    border-color:#555;
+}
+
+.dark #userInput::placeholder{
+    color:#bbb;
+}
