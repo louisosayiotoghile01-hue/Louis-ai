@@ -133,13 +133,45 @@ button{
     padding:15px;
     box-sizing:border-box;
 }
-/* FINAL MOBILE CHAT SIZE FIX */
+/* FINAL LAUNCH CHAT DESIGN */
 
 #chat{
-    height:180px !important;
-    max-height:180px !important;
-    min-height:180px !important;
+    height:350px;
+    max-height:350px;
     overflow-y:auto;
-    padding:12px;
+    padding:15px;
     box-sizing:border-box;
+    border-radius:12px;
+    border:1px solid #ddd;
+    background:#fafafa;
+    scroll-behavior:smooth;
+}
+
+/* Better message appearance */
+
+.user-message,
+.ai-message{
+    max-width:85%;
+    padding:12px 15px;
+    margin:10px 0;
+    border-radius:16px;
+    line-height:1.5;
+    word-wrap:break-word;
+}
+
+.user-message{
+    margin-left:auto;
+    border-bottom-right-radius:4px;
+}
+
+.ai-message{
+    margin-right:auto;
+    border-bottom-left-radius:4px;
+}
+
+/* Dark mode chat */
+
+.dark #chat{
+    background:#2b2b2b;
+    border-color:#444;
 }
