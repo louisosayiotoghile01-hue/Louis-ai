@@ -1942,8 +1942,15 @@ if(
     // Show typing message
     chat.innerHTML += `
         <div id="typing">
-            <b>Louis AI is thinking...</b>
-        </div>
+    <p>
+        Louis AI is thinking
+        <span class="typing-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+        </span>
+    </p>
+</div>
     `;
 
     chat.scrollTop = chat.scrollHeight;
