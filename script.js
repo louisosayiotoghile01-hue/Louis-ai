@@ -645,6 +645,25 @@ function forgetLongTermMemory(searchText){
 
     return `I've forgotten the memory matching "${searchText}".`;
 }
+function showTyping(){
+    const chat = document.getElementById("chat");
+
+    const typing = document.createElement("div");
+    typing.className = "typing";
+    typing.id = "typingIndicator";
+    typing.innerText = "Louis AI is typing...";
+
+    chat.appendChild(typing);
+    chat.scrollTop = chat.scrollHeight;
+}
+
+function hideTyping(){
+    const typing = document.getElementById("typingIndicator");
+
+    if(typing){
+        typing.remove();
+    }
+}
 async function sendMessage(){
     const input = document.getElementById("userInput");
     const chat = document.getElementById("chat");
