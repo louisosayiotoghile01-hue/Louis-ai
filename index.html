@@ -233,6 +233,38 @@ footer{
     transform:translateY(-8px);
     box-shadow:0 12px 30px rgba(0,170,255,0.20);
     }
+    /* Hero Entrance Animation */
+
+.hero .robot,
+.hero h1,
+.hero p,
+.hero .buttons{
+    animation:fadeUp 0.8s ease both;
+}
+
+.hero h1{
+    animation-delay:0.15s;
+}
+
+.hero p{
+    animation-delay:0.3s;
+}
+
+.hero .buttons{
+    animation-delay:0.45s;
+}
+
+@keyframes fadeUp{
+    from{
+        opacity:0;
+        transform:translateY(25px);
+    }
+
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+    }
 </style>
 
 </head>
