@@ -2574,16 +2574,6 @@ if (
     for(let word in synonyms){
     text = text.replaceAll(word, synonyms[word]);
 }
-function rememberTopic(topic){
-
-    lastTopic = topic;
-
-    topicHistory.push(topic);
-
-    if(topicHistory.length > 5){
-        topicHistory.shift();
-    }
-}
 
 if(text.includes("javascript")) rememberTopic("javascript");
 if(text.includes("html")) rememberTopic("html");
