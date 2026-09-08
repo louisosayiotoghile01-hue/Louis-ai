@@ -1413,47 +1413,27 @@ if(rememberLower.startsWith("remember that ")){
 
         memoryValue = memoryContent.substring(start).trim();
     }
-// FAVOURITE COLOUR MEMORY ANSWER
-
-if(
-    lowerText.includes("what is my favourite colour") ||
-    lowerText.includes("what is my favorite color") ||
-    lowerText.includes("what is my favourite color") ||
-    lowerText.includes("what is my favorite colour") ||
-    lowerText.includes("what's my favourite colour") ||
-    lowerText.includes("what's my favorite color")
+// FAVOURITE COLOUR
+else if(
+    memoryLower.startsWith("my favourite colour is ") ||
+    memoryLower.startsWith("my favorite color is ") ||
+    memoryLower.startsWith("my favourite color is ") ||
+    memoryLower.startsWith("my favorite colour is ")
 ){
 
-    const memories = getAllPersonalMemory();
+    memoryKey = "favoriteColor";
 
-    const color =
-        memories.favoriteColor ||
-        memories.favouriteColor ||
-        memories["favorite_color"] ||
-        memories["favourite_color"];
+    let start =
+        memoryLower.startsWith("my favourite colour is ")
+            ? 23
+            : memoryLower.startsWith("my favorite color is ")
+                ? 21
+                : memoryLower.startsWith("my favourite color is ")
+                    ? 22
+                    : 22;
 
-    if(color){
-
-        chat.innerHTML += `
-            <div class="ai-message">
-                Your favourite colour is ${color}. 🎨
-            </div>
-        `;
-
-    }else{
-
-        chat.innerHTML += `
-            <div class="ai-message">
-                I don't have your favourite colour saved yet. 🎨
-            </div>
-        `;
-    }
-
-    chat.scrollTop = chat.scrollHeight;
-
-    return;
+    memoryValue = memoryContent.substring(start).trim();
 }
-
     // HOBBY
     else if(memoryLower.startsWith("my hobby is ")){
 
