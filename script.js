@@ -525,12 +525,7 @@ function cleanDuplicateLongTermMemories(){
     );
 }
 cleanDuplicateLongTermMemories();
-function getLongTermMemory(){
 
-    return JSON.parse(
-        localStorage.getItem("longTermMemory")
-    ) || [];
-}
 // ==========================================
 // 🧠 LOUIS AI MEMORY CONTROL
 // ==========================================
