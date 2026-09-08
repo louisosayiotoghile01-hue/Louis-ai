@@ -100,7 +100,9 @@ function saveLongTermMemory(memory){
 
 function getLongTermMemory(){
 
-    return longTermMemory;
+    return JSON.parse(
+        localStorage.getItem("longTermMemory")
+    ) || [];
 }
 // ==========================================
 // 🧠 AUTOMATIC LONG-TERM MEMORY
