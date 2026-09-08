@@ -453,49 +453,6 @@ async function loadKnowledge() {
     }
 
 }
-function saveLongTermMemory(text){
-
-    let memories = JSON.parse(
-        localStorage.getItem("longTermMemory")
-    ) || [];
-
-    // Clean the text
-    const cleanText = text.trim();
-
-    if(cleanText === ""){
-        return "I don't have anything to remember.";
-    }
-
-    // Don't save the exact same memory twice
-    const alreadyExists = memories.some(function(item){
-
-        return item.memory &&
-               item.memory.toLowerCase() === cleanText.toLowerCase();
-
-    });
-
-    if(alreadyExists){
-        return "I already remember that. 🧠";
-    }
-
-    // Save the new memory
-    memories.push({
-        memory: cleanText,
-        date: new Date().toISOString()
-    });
-
-    // Keep only the latest 50 memories
-    if(memories.length > 50){
-        memories = memories.slice(-50);
-    }
-
-    localStorage.setItem(
-        "longTermMemory",
-        JSON.stringify(memories)
-    );
-
-    return "I'll remember that. 🧠";
-}
 // ========================================
 // CLEAN DUPLICATE LONG-TERM MEMORIES
 // ========================================
