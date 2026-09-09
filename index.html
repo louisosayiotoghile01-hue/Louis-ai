@@ -541,15 +541,26 @@ function startLouisAIProPayment(){
 
         if(data.success){
 
-            alert(
-                "Payment verified successfully! 🎉\n\n" +
-                "Welcome to Louis AI Pro!"
-            );
+    // Save verified Pro access on this device
+    localStorage.setItem("louisAIPro", "true");
 
-            console.log(
-                "Verified Paystack reference:",
-                data.reference
-            );
+    // Save the verified payment reference
+    localStorage.setItem(
+        "louisAIProReference",
+        data.reference
+    );
+
+    alert(
+        "Payment verified successfully! 🎉\n\n" +
+        "Welcome to Louis AI Pro!"
+    );
+
+    console.log(
+        "Verified Paystack reference:",
+        data.reference
+    );
+
+}
 
         }else{
 
