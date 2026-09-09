@@ -469,47 +469,73 @@ function cleanDuplicateLongTermMemories(){
 
         let cleanText = String(item.memory).trim();
 
-        // Fix corrupted "y" memories
+        // Fix corrupted memories
         cleanText = cleanText.replace(/^y\s+/i, "my ");
-
-        // Fix "am building Louis AI"
         cleanText = cleanText.replace(
             /^am building louis ai\.?$/i,
             "I am building Louis AI."
         );
 
-        // Make favourite/favorite consistent
+        // Normalize spelling
         cleanText = cleanText.replace(
             /\bfavourite\b/gi,
             "favorite"
         );
 
-        // Remove extra spaces
-        cleanText = cleanText.replace(/\s+/g, " ").trim();
+        cleanText = cleanText.replace(
+            /\bcolour\b/gi,
+            "color"
+        );
 
-        // Remove repeated dots
-        cleanText = cleanText.replace(/\.+$/, ".");
+        // Normalize "The user's" to "my"
+        cleanText = cleanText.replace(
+            /^the user's\s+/i,
+            "my "
+        );
 
-        // Create duplicate-check key
-        const key = cleanText
-            .toLowerCase()
-            .replace(/[.!?]+$/, "")
+        // Normalize "user's" to "my"
+        cleanText = cleanText.replace(
+            /^user's\s+/i,
+            "my "
+        );
+
+        // Normalize "I like" and "like"
+        cleanText = cleanText.replace(
+            /^like\s+/i,
+            "I like "
+        );
+
+        // Clean spaces
+        cleanText = cleanText
             .replace(/\s+/g, " ")
             .trim();
 
+        // Clean punctuation
+        cleanText = cleanText
+            .replace(/[.!?]+$/, "")
+            .trim();
+
+        // Create normalized duplicate key
+        const key = cleanText
+            .toLowerCase()
+            .replace(/\s+/g, " ")
+            .trim();
+
+        // Keep only one copy
         if(!seen.has(key)){
 
             seen.add(key);
 
             uniqueMemories.push({
-                memory: cleanText,
+                memory: cleanText + ".",
                 date: item.date || new Date().toISOString()
             });
+
         }
 
     });
 
-    // Keep latest 50
+    // Keep latest 50 unique memories
     const finalMemories = uniqueMemories.slice(-50);
 
     localStorage.setItem(
