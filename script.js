@@ -182,12 +182,7 @@ function getPersonalMemory(key){
 
 function getAllPersonalMemory(){
 
-    return {
-        personalMemory: personalMemory,
-
-        conversationMemory: chatMemory.slice(-20)
-    };
-
+    return personalMemory;
 }
 // ==========================================
 // 🧠 LOUIS AI FOLLOW-UP & TOPIC MEMORY
