@@ -5,9 +5,7 @@ let lastQuestion = "";
 let topicHistory = [];
 let conversation = JSON.parse(localStorage.getItem("conversation")) || [];
 // Louis AI conversation memory
-function getRecentConversation() {
-    return conversation.slice(-20);
-}
+
 let learnedFacts = JSON.parse(localStorage.getItem("learnedFacts")) || {};
 let notes = JSON.parse(localStorage.getItem("notes")) || [];
 let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
@@ -100,7 +98,9 @@ function saveLongTermMemory(memory){
 
 function getLongTermMemory(){
 
-    return longTermMemory;
+    return JSON.parse(
+        localStorage.getItem("longTermMemory")
+    ) || [];
 }
 // ==========================================
 // 🧠 AUTOMATIC LONG-TERM MEMORY
@@ -453,49 +453,6 @@ async function loadKnowledge() {
     }
 
 }
-function saveLongTermMemory(text){
-
-    let memories = JSON.parse(
-        localStorage.getItem("longTermMemory")
-    ) || [];
-
-    // Clean the text
-    const cleanText = text.trim();
-
-    if(cleanText === ""){
-        return "I don't have anything to remember.";
-    }
-
-    // Don't save the exact same memory twice
-    const alreadyExists = memories.some(function(item){
-
-        return item.memory &&
-               item.memory.toLowerCase() === cleanText.toLowerCase();
-
-    });
-
-    if(alreadyExists){
-        return "I already remember that. 🧠";
-    }
-
-    // Save the new memory
-    memories.push({
-        memory: cleanText,
-        date: new Date().toISOString()
-    });
-
-    // Keep only the latest 50 memories
-    if(memories.length > 50){
-        memories = memories.slice(-50);
-    }
-
-    localStorage.setItem(
-        "longTermMemory",
-        JSON.stringify(memories)
-    );
-
-    return "I'll remember that. 🧠";
-}
 // ========================================
 // CLEAN DUPLICATE LONG-TERM MEMORIES
 // ========================================
@@ -566,12 +523,7 @@ function cleanDuplicateLongTermMemories(){
     );
 }
 cleanDuplicateLongTermMemories();
-function getLongTermMemory(){
 
-    return JSON.parse(
-        localStorage.getItem("longTermMemory")
-    ) || [];
-}
 // ==========================================
 // 🧠 LOUIS AI MEMORY CONTROL
 // ==========================================
@@ -1461,47 +1413,27 @@ if(rememberLower.startsWith("remember that ")){
 
         memoryValue = memoryContent.substring(start).trim();
     }
-// FAVOURITE COLOUR MEMORY ANSWER
-
-if(
-    lowerText.includes("what is my favourite colour") ||
-    lowerText.includes("what is my favorite color") ||
-    lowerText.includes("what is my favourite color") ||
-    lowerText.includes("what is my favorite colour") ||
-    lowerText.includes("what's my favourite colour") ||
-    lowerText.includes("what's my favorite color")
+// FAVOURITE COLOUR
+else if(
+    memoryLower.startsWith("my favourite colour is ") ||
+    memoryLower.startsWith("my favorite color is ") ||
+    memoryLower.startsWith("my favourite color is ") ||
+    memoryLower.startsWith("my favorite colour is ")
 ){
 
-    const memories = getAllPersonalMemory();
+    memoryKey = "favoriteColor";
 
-    const color =
-        memories.favoriteColor ||
-        memories.favouriteColor ||
-        memories["favorite_color"] ||
-        memories["favourite_color"];
+    let start =
+        memoryLower.startsWith("my favourite colour is ")
+            ? 23
+            : memoryLower.startsWith("my favorite color is ")
+                ? 21
+                : memoryLower.startsWith("my favourite color is ")
+                    ? 22
+                    : 22;
 
-    if(color){
-
-        chat.innerHTML += `
-            <div class="ai-message">
-                Your favourite colour is ${color}. 🎨
-            </div>
-        `;
-
-    }else{
-
-        chat.innerHTML += `
-            <div class="ai-message">
-                I don't have your favourite colour saved yet. 🎨
-            </div>
-        `;
-    }
-
-    chat.scrollTop = chat.scrollHeight;
-
-    return;
+    memoryValue = memoryContent.substring(start).trim();
 }
-
     // HOBBY
     else if(memoryLower.startsWith("my hobby is ")){
 
@@ -2622,16 +2554,6 @@ if (
     for(let word in synonyms){
     text = text.replaceAll(word, synonyms[word]);
 }
-function rememberTopic(topic){
-
-    lastTopic = topic;
-
-    topicHistory.push(topic);
-
-    if(topicHistory.length > 5){
-        topicHistory.shift();
-    }
-}
 
 if(text.includes("javascript")) rememberTopic("javascript");
 if(text.includes("html")) rememberTopic("html");
@@ -3330,4 +3252,4 @@ function startListening(){
     };
 
     recognition.start();
-    }
+}
