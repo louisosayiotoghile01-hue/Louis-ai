@@ -528,15 +528,55 @@ function startLouisAIProPayment(){
 
         plan: "PLN_6llnh8t8ewvftzv",
 
-        callback: function(response){
+        callback: async function(response){
+
+    try{
+
+        const verifyResponse = await fetch(
+            "/api/verify-payment?reference=" +
+            encodeURIComponent(response.reference)
+        );
+
+        const data = await verifyResponse.json();
+
+        if(data.success){
 
             alert(
-                "Payment successful! 🎉\n\n" +
+                "Payment verified successfully! 🎉\n\n" +
                 "Welcome to Louis AI Pro!"
             );
 
-            console.log("Paystack reference:", response.reference);
-        },
+            console.log(
+                "Verified Paystack reference:",
+                data.reference
+            );
+
+        }else{
+
+            alert(
+                "Payment was received, but verification failed.\n\n" +
+                "Please contact Louis AI support."
+            );
+
+            console.error(
+                "Verification failed:",
+                data.message
+            );
+        }
+
+    }catch(error){
+
+        console.error(
+            "Payment verification error:",
+            error
+        );
+
+        alert(
+            "We could not verify the payment right now.\n\n" +
+            "Please contact Louis AI support."
+        );
+    }
+},
 
         onClose: function(){
             console.log("Payment window closed.");
