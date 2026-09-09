@@ -2601,15 +2601,6 @@ if(memoryReply){
         return "Great! I'll remember that your favourite food is " + food + ".";
     }
 
-    if(text.includes("what is my favourite food")){
-        let food = localStorage.getItem("favoriteFood");
-        if(food){
-            return "Your favourite food is " + food + ".";
-        }else{
-            return "You haven't told me your favourite food yet.";
-        }
-    }
-
     if(text.startsWith("my birthday is ")){
         let birthday = userText.substring(15);
         localStorage.setItem("birthday", birthday);
