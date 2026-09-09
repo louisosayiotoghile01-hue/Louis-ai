@@ -504,6 +504,12 @@ function cleanDuplicateLongTermMemories(){
             /^like\s+/i,
             "I like "
         );
+        
+        // Normalize "favorite" to "my favorite"
+cleanText = cleanText.replace(
+    /^favorite\s+/i,
+    "my favorite "
+);
 
         // Clean spaces
         cleanText = cleanText
