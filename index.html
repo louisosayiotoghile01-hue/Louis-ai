@@ -505,7 +505,47 @@ AI experience.
 
 </footer>
 
+<!-- Paystack -->
+<script src="https://js.paystack.co/v2/inline.js"></script>
 
+<script>
+function startLouisAIProPayment(){
+
+    const email = prompt("Enter your email address:");
+
+    if(!email){
+        return;
+    }
+
+    const handler = PaystackPop.setup({
+        key: "YOUR_PAYSTACK_PUBLIC_KEY",
+
+        email: email,
+
+        amount: 500000,
+
+        currency: "NGN",
+
+        plan: "PLN_6lnh8t8ewvftzv",
+
+        callback: function(response){
+
+            alert(
+                "Payment successful! 🎉\n\n" +
+                "Welcome to Louis AI Pro!"
+            );
+
+            console.log("Paystack reference:", response.reference);
+        },
+
+        onClose: function(){
+            console.log("Payment window closed.");
+        }
+    });
+
+    handler.openIframe();
+}
+</script>
 </body>
 
     </html>
