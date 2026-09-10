@@ -9,7 +9,12 @@ module.exports = async function handler(req, res) {
 
     try {
 
-        const { message, history, memory } = req.body || {};
+const {
+    message,
+    history = [],
+    memory = {},
+    proUser = false
+} = req.body;
 
         if (!message || typeof message !== "string") {
             return res.status(400).json({
@@ -48,10 +53,11 @@ const longTermMemory =
         role: "developer",
 
         content: `
+${proUser ? "The user is a Louis AI Pro user. Give this user the enhanced Louis AI Pro experience." : "The user is using the standard Louis AI experience."}
+
 You are Louis AI, a helpful and intelligent personal AI assistant.
 
 Your job is to have natural, intelligent conversations with the user.
-
 ========================
 CONVERSATION MEMORY
 ========================
