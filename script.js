@@ -643,6 +643,9 @@ function hideTyping(){
         typing.remove();
     }
 }
+function isLouisAIPro(){
+    return localStorage.getItem("louisAIPro") === "true";
+}
 async function sendMessage(){
     const input = document.getElementById("userInput");
     const chat = document.getElementById("chat");
