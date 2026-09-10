@@ -659,6 +659,9 @@ if(userText === ""){
     const proUser = isLouisAIPro();
 
 console.log("Is Louis AI Pro user:", proUser);
+    if(proUser){
+    console.log("💎 Louis AI Pro features are unlocked.");
+    }
     // ==========================================
 // 🧠 MEMORY CONTROL COMMANDS
 // ==========================================
