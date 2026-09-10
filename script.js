@@ -2014,7 +2014,63 @@ copyButton.addEventListener("click", async function(){
     }
 
 });
+    // 🔄 REGENERATE AI RESPONSE
+    const regenerateButton =
+        chat.lastElementChild.querySelector(".regenerate-ai-button");
 
+    regenerateButton.addEventListener("click", async function(){
+
+        regenerateButton.textContent = "⏳ Regenerating...";
+
+        try{
+
+            const newReply = await getAIResponse(
+                lastUserMessage,
+                getRecentConversation()
+            );
+
+            const formattedNewReply = newReply
+                .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+                .replace(/^### (.*?)$/gm, "<h3>$1</h3>")
+                .replace(/\n/g, "<br>");
+
+            const newAIMessage = document.createElement("div");
+
+            newAIMessage.className = "ai-message";
+
+            newAIMessage.innerHTML = `
+                ${formattedNewReply}
+
+                <br>
+
+                <button class="copy-ai-button" type="button">
+                    📋 Copy
+                </button>
+
+                <button class="regenerate-ai-button" type="button">
+                    🔄 Regenerate
+                </button>
+            `;
+
+            chat.appendChild(newAIMessage);
+
+            chat.scrollTop = chat.scrollHeight;
+
+            regenerateButton.textContent = "🔄 Regenerate";
+
+        }catch(error){
+
+            console.error("Regenerate error:", error);
+
+            regenerateButton.textContent = "❌ Failed";
+
+            setTimeout(function(){
+                regenerateButton.textContent = "🔄 Regenerate";
+            }, 2000);
+
+        }
+
+    });
         chat.scrollTop = chat.scrollHeight;
 
         chatMemory.push({
