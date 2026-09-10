@@ -646,6 +646,7 @@ function hideTyping(){
 function isLouisAIPro(){
     return localStorage.getItem("louisAIPro") === "true";
 }
+console.log("Louis AI Pro status:", isLouisAIPro());
 async function sendMessage(){
     const input = document.getElementById("userInput");
     const chat = document.getElementById("chat");
