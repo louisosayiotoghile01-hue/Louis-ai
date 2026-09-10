@@ -1984,8 +1984,12 @@ chat.innerHTML += `
         <br>
 
         <button class="copy-ai-button" type="button">
-            📋 Copy
-        </button>
+    📋 Copy
+</button>
+
+<button class="regenerate-ai-button" type="button">
+    🔄 Regenerate
+</button>
     </div>
 `;
 
