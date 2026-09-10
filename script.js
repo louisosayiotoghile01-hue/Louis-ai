@@ -1972,15 +1972,44 @@ if (
         // Remember AI reply
         lastAIMessage = reply;
 
-        chat.innerHTML += `
+        const formattedReply = reply
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    .replace(/^### (.*?)$/gm, "<h3>$1</h3>")
+    .replace(/\n/g, "<br>");
+
+chat.innerHTML += `
     <div class="ai-message">
-        ${reply
-            .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-            .replace(/^### (.*?)$/gm, "<h3>$1</h3>")
-            .replace(/\n/g, "<br>")
-        }
+        ${formattedReply}
+
+        <br>
+
+        <button class="copy-ai-button" type="button">
+            📋 Copy
+        </button>
     </div>
 `;
+
+const copyButton = chat.lastElementChild.querySelector(".copy-ai-button");
+
+copyButton.addEventListener("click", async function(){
+
+    try{
+
+        await navigator.clipboard.writeText(reply);
+
+        copyButton.textContent = "✅ Copied";
+
+        setTimeout(function(){
+            copyButton.textContent = "📋 Copy";
+        }, 2000);
+
+    }catch(error){
+
+        copyButton.textContent = "❌ Copy failed";
+
+    }
+
+});
 
         chat.scrollTop = chat.scrollHeight;
 
