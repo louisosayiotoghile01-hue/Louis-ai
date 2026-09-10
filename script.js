@@ -405,7 +405,9 @@ async function getAIResponse(message, history = []) {
                 memory: {
     personal: getAllPersonalMemory(),
     longTerm: getLongTermMemory()
-}
+},
+
+proUser: localStorage.getItem("louisAIPro") === "true"
 
             })
 
