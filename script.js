@@ -646,6 +646,22 @@ function hideTyping(){
 function isLouisAIPro(){
     return localStorage.getItem("louisAIPro") === "true";
 }
+function showProBadge(){
+
+    if(!isLouisAIPro()){
+        return;
+    }
+
+    const chat = document.getElementById("chat");
+
+    const badge = document.createElement("div");
+
+    badge.className = "pro-badge";
+    badge.innerText = "💎 Louis AI Pro";
+
+    chat.appendChild(badge);
+}
+showProBadge();
 console.log("Louis AI Pro status:", isLouisAIPro());
 async function sendMessage(){
     const input = document.getElementById("userInput");
