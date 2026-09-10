@@ -1973,10 +1973,14 @@ if (
         lastAIMessage = reply;
 
         chat.innerHTML += `
-            <div class="ai-message">
-                ${reply}
-            </div>
-        `;
+    <div class="ai-message">
+        ${reply
+            .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+            .replace(/^### (.*?)$/gm, "<h3>$1</h3>")
+            .replace(/\n/g, "<br>")
+        }
+    </div>
+`;
 
         chat.scrollTop = chat.scrollHeight;
 
