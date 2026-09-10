@@ -683,7 +683,39 @@ console.log("Is Louis AI Pro user:", proUser);
 // ==========================================
 
 const lowerText = userText.toLowerCase();
+// 💎 LOUIS AI PRO FEATURES
+if(
+    proUser &&
+    (
+        lowerText === "what pro features do i have" ||
+        lowerText === "what pro features do i have?" ||
+        lowerText === "show my pro features" ||
+        lowerText === "what are my pro features"
+    )
+){
 
+    const proFeaturesDiv = document.createElement("div");
+
+    proFeaturesDiv.className = "ai-message";
+
+    proFeaturesDiv.innerHTML = `
+        💎 <strong>Louis AI Pro</strong><br><br>
+        Your Pro features include:<br>
+        ✅ Advanced AI features<br>
+        ✅ Enhanced long-term memory<br>
+        ✅ Voice interaction<br>
+        ✅ Higher usage limits<br>
+        ✅ Priority access to new features
+    `;
+
+    chat.appendChild(proFeaturesDiv);
+
+    chat.scrollTop = chat.scrollHeight;
+
+    input.value = "";
+
+    return;
+}
 if(
     lowerText === "what do you remember about me" ||
     lowerText === "what do you remember about me?" ||
