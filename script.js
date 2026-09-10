@@ -656,6 +656,9 @@ async function sendMessage(){
 if(userText === ""){
     return;
 }
+    const proUser = isLouisAIPro();
+
+console.log("Is Louis AI Pro user:", proUser);
     // ==========================================
 // 🧠 MEMORY CONTROL COMMANDS
 // ==========================================
