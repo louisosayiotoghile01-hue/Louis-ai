@@ -540,20 +540,12 @@ function startLouisAIProPayment(){
         const data = await verifyResponse.json();
 
         if(data.success){
+localStorage.setItem("louisAIPro", "true");
 
-    // Save verified Pro access on this device
-    localStorage.setItem("louisAIPro", "true");
-
-    // Save the verified payment reference
-    localStorage.setItem(
-        "louisAIProReference",
-        data.reference
-    );
-
-    alert(
-        "Payment verified successfully! 🎉\n\n" +
-        "Welcome to Louis AI Pro!"
-    );
+alert(
+    "Payment verified successfully! 🎉\n\n" +
+    "Welcome to Louis AI Pro!"
+);
 
     console.log(
         "Verified Paystack reference:",
