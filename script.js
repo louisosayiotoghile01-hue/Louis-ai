@@ -2078,6 +2078,31 @@ copyButton.addEventListener("click", async function(){
         }
 
     });
+            // 👍 / 👎 AI FEEDBACK
+    const feedbackButtons =
+        chat.lastElementChild.querySelectorAll(".feedback-button");
+
+    feedbackButtons.forEach(function(button){
+
+        button.addEventListener("click", function(){
+
+            if(button.textContent.includes("👍")){
+
+                button.textContent = "✅ Helpful";
+
+            }else{
+
+                button.textContent = "✅ Thanks";
+
+            }
+
+            feedbackButtons.forEach(function(otherButton){
+                otherButton.disabled = true;
+            });
+
+        });
+
+    });
         chat.scrollTop = chat.scrollHeight;
 
         chatMemory.push({
