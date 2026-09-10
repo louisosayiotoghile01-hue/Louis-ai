@@ -2050,6 +2050,13 @@ copyButton.addEventListener("click", async function(){
                 <button class="regenerate-ai-button" type="button">
                     🔄 Regenerate
                 </button>
+                <button class="feedback-button" type="button">
+    👍
+</button>
+
+<button class="feedback-button" type="button">
+    👎
+</button>
             `;
 
             chat.appendChild(newAIMessage);
