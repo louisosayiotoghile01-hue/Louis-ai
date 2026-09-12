@@ -401,3 +401,30 @@ button:active{
         opacity:1;
     }
 }
+.feedback-button{
+    display: inline-block;
+    width: auto;
+    margin-top: 8px;
+    margin-right: 6px;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.feedback-button:disabled{
+    opacity: 0.6;
+    cursor: default;
+}
+/* 👍 👎 Feedback buttons */
+.feedback-button{
+    display:inline-block !important;
+    width:180px !important;
+    min-width:0 !important;
+    margin:6px 4px !important;
+}
+
+.feedback-button:disabled{
+    opacity:0.45;
+}
