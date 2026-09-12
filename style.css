@@ -402,9 +402,11 @@ button:active{
     }
 }
 .feedback-button{
+    display: inline-block;
+    width: auto;
     margin-top: 8px;
     margin-right: 6px;
-    padding: 10px 16px;
+    padding: 10px 18px;
     border: none;
     border-radius: 10px;
     cursor: pointer;
@@ -414,4 +416,4 @@ button:active{
 .feedback-button:disabled{
     opacity: 0.6;
     cursor: default;
-    }
+}
