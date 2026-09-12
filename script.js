@@ -2057,6 +2057,13 @@ copyButton.addEventListener("click", async function(){
 <button class="feedback-button" type="button">
     👎
 </button>
+                <button class="feedback-button" type="button">
+    👍
+</button>
+
+<button class="feedback-button" type="button">
+    👎
+</button>
             `;
 
             chat.appendChild(newAIMessage);
