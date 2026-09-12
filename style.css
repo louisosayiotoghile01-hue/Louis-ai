@@ -417,3 +417,14 @@ button:active{
     opacity: 0.6;
     cursor: default;
 }
+/* 👍 👎 Feedback buttons */
+.feedback-button{
+    display:inline-block !important;
+    width:180px !important;
+    min-width:0 !important;
+    margin:6px 4px !important;
+}
+
+.feedback-button:disabled{
+    opacity:0.45;
+}
