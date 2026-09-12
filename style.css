@@ -401,3 +401,17 @@ button:active{
         opacity:1;
     }
 }
+.feedback-button{
+    margin-top: 8px;
+    margin-right: 6px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.feedback-button:disabled{
+    opacity: 0.6;
+    cursor: default;
+    }
