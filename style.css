@@ -428,3 +428,12 @@ button:active{
 .feedback-button:disabled{
     opacity:0.45;
 }
+/* Feedback button layout fix */
+.feedback-button{
+    display: inline-block !important;
+    width: calc(50% - 6px) !important;
+    min-width: 0 !important;
+    margin: 6px 4px 0 0 !important;
+    padding: 10px 18px !important;
+    box-sizing: border-box;
+}
