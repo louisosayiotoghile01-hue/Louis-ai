@@ -400,7 +400,8 @@ async function getAIResponse(message, history = []) {
 
                 // Send conversation history correctly
                 history: history,
-
+// Send follow-up conversation context
+followUpContext: getFollowUpContext(),
                 // Send Louis AI's personal memory
                 memory: {
     personal: getAllPersonalMemory(),
