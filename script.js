@@ -3476,7 +3476,9 @@ function updateFeedbackDashboard(){
     }).length;
 
     let total = aiFeedback.length;
-
+let positiveRate = total === 0
+    ? 0
+    : Math.round((positive / total) * 100);
     document.getElementById("positiveFeedback").textContent = positive;
 
     document.getElementById("negativeFeedback").textContent = negative;
