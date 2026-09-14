@@ -2103,7 +2103,29 @@ copyButton.addEventListener("click", async function(){
                 button.textContent = "✅ Thanks";
 
             }
+// 💾 SAVE AI FEEDBACK
 
+let feedbackType;
+
+if(button.textContent.includes("👍")){
+    feedbackType = "positive";
+}else{
+    feedbackType = "negative";
+}
+
+let aiFeedback =
+    JSON.parse(localStorage.getItem("aiFeedback")) || [];
+
+aiFeedback.push({
+    type: feedbackType,
+    message: lastAIMessage,
+    time: new Date().toISOString()
+});
+
+localStorage.setItem(
+    "aiFeedback",
+    JSON.stringify(aiFeedback)
+);
             feedbackButtons.forEach(function(otherButton){
                 otherButton.disabled = true;
             });
