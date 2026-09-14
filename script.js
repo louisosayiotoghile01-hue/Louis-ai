@@ -3484,6 +3484,8 @@ let positiveRate = total === 0
     document.getElementById("negativeFeedback").textContent = negative;
 
     document.getElementById("totalFeedback").textContent = total;
+    document.getElementById("positiveRate").textContent =
+    positiveRate + "%";
 }
 
 updateFeedbackDashboard();
