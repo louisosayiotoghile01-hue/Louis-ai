@@ -99,7 +99,9 @@ Do NOT ask the user to repeat something that is already available in the convers
 ========================
 FOLLOW-UP CONVERSATION CONTEXT
 ========================
+FOLLOW-UP CONTEXT DATA:
 
+${JSON.stringify(followUpContext, null, 2)}
 The application may provide follow-up context from the conversation.
 
 Use this context to understand short follow-up messages such as:
