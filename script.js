@@ -3460,3 +3460,27 @@ function startListening(){
 
     recognition.start();
 }
+// 📊 UPDATE AI FEEDBACK DASHBOARD
+function updateFeedbackDashboard(){
+
+    let aiFeedback =
+        JSON.parse(localStorage.getItem("aiFeedback")) || [];
+
+    let positive = aiFeedback.filter(function(item){
+        return item.type === "positive";
+    }).length;
+
+    let negative = aiFeedback.filter(function(item){
+        return item.type === "negative";
+    }).length;
+
+    let total = aiFeedback.length;
+
+    document.getElementById("positiveFeedback").textContent = positive;
+
+    document.getElementById("negativeFeedback").textContent = negative;
+
+    document.getElementById("totalFeedback").textContent = total;
+}
+
+updateFeedbackDashboard();
