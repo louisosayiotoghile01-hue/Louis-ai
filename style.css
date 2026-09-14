@@ -448,3 +448,14 @@ body.dark-mode #feedbackDashboard p,
 body.dark-mode #feedbackDashboard span{
     color:#fff !important;
 }
+/* 📊 Feedback Dashboard - Correct Dark Mode */
+body.dark #feedbackDashboard{
+    background:#222 !important;
+    color:#fff !important;
+}
+
+body.dark #feedbackDashboard h3,
+body.dark #feedbackDashboard p,
+body.dark #feedbackDashboard span{
+    color:#fff !important;
+}
