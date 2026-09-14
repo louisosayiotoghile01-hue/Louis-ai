@@ -2126,6 +2126,7 @@ localStorage.setItem(
     "aiFeedback",
     JSON.stringify(aiFeedback)
 );
+            updateFeedbackDashboard();
             feedbackButtons.forEach(function(otherButton){
                 otherButton.disabled = true;
             });
