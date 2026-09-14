@@ -437,3 +437,14 @@ button:active{
     padding: 10px 18px !important;
     box-sizing: border-box;
 }
+/* 📊 Feedback Dashboard Dark Mode */
+body.dark-mode #feedbackDashboard{
+    background:#222 !important;
+    color:#fff !important;
+}
+
+body.dark-mode #feedbackDashboard h3,
+body.dark-mode #feedbackDashboard p,
+body.dark-mode #feedbackDashboard span{
+    color:#fff !important;
+}
