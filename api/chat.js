@@ -12,6 +12,7 @@ module.exports = async function handler(req, res) {
 const {
     message,
     history = [],
+    followUpContext = {},
     memory = {},
     proUser = false
 } = req.body;
