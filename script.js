@@ -2093,7 +2093,7 @@ copyButton.addEventListener("click", async function(){
     feedbackButtons.forEach(function(button){
 
         button.addEventListener("click", function(){
-
+const originalFeedback = button.textContent.includes("👍");
             if(button.textContent.includes("👍")){
 
                 button.textContent = "✅ Helpful";
@@ -2107,7 +2107,7 @@ copyButton.addEventListener("click", async function(){
 
 let feedbackType;
 
-if(button.textContent.includes("👍")){
+if(originalFeedback){
     feedbackType = "positive";
 }else{
     feedbackType = "negative";
