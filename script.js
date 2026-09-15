@@ -2001,7 +2001,9 @@ chat.innerHTML += `
 </button>
     </div>
 `;
-
+if(window.MathJax){
+    MathJax.typesetPromise();
+}
 const copyButton = chat.lastElementChild.querySelector(".copy-ai-button");
 
 copyButton.addEventListener("click", async function(){
