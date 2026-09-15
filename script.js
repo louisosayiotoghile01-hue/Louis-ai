@@ -2110,10 +2110,21 @@ const originalFeedback = button.textContent.includes("👍");
 
 let feedbackType;
 
-if(originalFeedback){
+if(button.textContent.includes("👍")){
     feedbackType = "positive";
 }else{
     feedbackType = "negative";
+}
+
+// Change button appearance after recording the type
+if(feedbackType === "positive"){
+
+    button.textContent = "✅ Helpful";
+
+}else{
+
+    button.textContent = "✅ Thanks";
+
 }
 
 let aiFeedback =
