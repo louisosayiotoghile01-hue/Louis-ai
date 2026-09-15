@@ -459,3 +459,11 @@ body.dark #feedbackDashboard p,
 body.dark #feedbackDashboard span{
     color:#fff !important;
 }
+/* 📐 Mobile MathJax overflow fix */
+mjx-container[display="true"]{
+    max-width:100% !important;
+    overflow-x:auto !important;
+    overflow-y:hidden !important;
+    display:block !important;
+    padding-bottom:5px;
+}
