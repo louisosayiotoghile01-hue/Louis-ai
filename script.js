@@ -2099,6 +2099,13 @@ copyButton.addEventListener("click", async function(){
 
         button.addEventListener("click", function(){
 const originalFeedback = button.textContent.includes("👍");
+            let feedbackType;
+
+if(button.textContent.includes("👍")){
+    feedbackType = "positive";
+}else{
+    feedbackType = "negative";
+}
             if(button.textContent.includes("👍")){
 
                 button.textContent = "✅ Helpful";
