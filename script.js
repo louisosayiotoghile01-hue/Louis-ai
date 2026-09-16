@@ -3534,8 +3534,14 @@ let positiveRate = total === 0
                     ? "👍"
                     : "👎";
 
-                feedbackItem.textContent =
-                    icon + " " + item.message;
+                const formattedFeedback = item.message
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    .replace(/^### (.*?)$/gm, "<h3>$1</h3>")
+    .replace(/^- (.*?)$/gm, "• $1")
+    .replace(/\n/g, "<br>");
+
+feedbackItem.innerHTML =
+    icon + " " + formattedFeedback;
 
                 recentFeedback.appendChild(
                     feedbackItem
