@@ -2099,7 +2099,7 @@ copyButton.addEventListener("click", async function(){
 
         button.addEventListener("click", function(){
 const originalFeedback = button.textContent.includes("👍");
-            if(button.textContent.includes("👍")){
+            if(originalFeedback.includes("👍")){
 
                 button.textContent = "✅ Helpful";
 
