@@ -2099,6 +2099,13 @@ copyButton.addEventListener("click", async function(){
 
         button.addEventListener("click", function(){
 const originalFeedback = button.textContent.includes("👍");
+            let feedbackType;
+
+if(originalFeedback.includes("👍")){
+    feedbackType = "positive";
+}else{
+    feedbackType = "negative";
+}
             if(originalFeedback.includes("👍")){
 
                 button.textContent = "✅ Helpful";
@@ -2109,14 +2116,6 @@ const originalFeedback = button.textContent.includes("👍");
 
             }
 // 💾 SAVE AI FEEDBACK
-
-let feedbackType;
-
-if(button.textContent.includes("👍")){
-    feedbackType = "positive";
-}else{
-    feedbackType = "negative";
-}
 
 // Change button appearance after recording the type
 if(feedbackType === "positive"){
