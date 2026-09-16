@@ -1976,6 +1976,8 @@ if (
         const formattedReply = reply
     .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
     .replace(/^### (.*?)$/gm, "<h3>$1</h3>")
+    .replace(/^- (.*?)$/gm, "• $1")
+    .replace(/^\d+\.\s+(.*?)$/gm, "$&")
     .replace(/\n/g, "<br>");
 
 chat.innerHTML += `
