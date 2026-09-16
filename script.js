@@ -2117,14 +2117,6 @@ if(originalFeedback.includes("👍")){
             }
 // 💾 SAVE AI FEEDBACK
 
-let feedbackType;
-
-if(button.textContent.includes("👍")){
-    feedbackType = "positive";
-}else{
-    feedbackType = "negative";
-}
-
 // Change button appearance after recording the type
 if(feedbackType === "positive"){
 
