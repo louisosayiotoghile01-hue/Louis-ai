@@ -3500,6 +3500,50 @@ let positiveRate = total === 0
     document.getElementById("totalFeedback").textContent = total;
     document.getElementById("positiveRate").textContent =
     positiveRate + "%";
+        // 📝 SHOW RECENT FEEDBACK
+
+    const recentFeedback =
+        document.getElementById("recentFeedback");
+
+    if(recentFeedback){
+
+        if(aiFeedback.length === 0){
+
+            recentFeedback.innerHTML =
+                "No feedback yet.";
+
+        }else{
+
+            const recent = aiFeedback
+                .slice(-5)
+                .reverse();
+
+            recentFeedback.innerHTML = "";
+
+            recent.forEach(function(item){
+
+                const feedbackItem =
+                    document.createElement("div");
+
+                feedbackItem.style.marginBottom = "12px";
+
+                const icon =
+                    item.type === "positive"
+                    ? "👍"
+                    : "👎";
+
+                feedbackItem.textContent =
+                    icon + " " + item.message;
+
+                recentFeedback.appendChild(
+                    feedbackItem
+                );
+
+            });
+
+        }
+
+    }
 }
 
 updateFeedbackDashboard();
