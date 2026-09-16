@@ -2106,7 +2106,7 @@ if(originalFeedback.includes("👍")){
 }else{
     feedbackType = "negative";
 }
-            if(button.textContent.includes("👍")){
+            if(originalFeedback.includes("👍")){
 
                 button.textContent = "✅ Helpful";
 
