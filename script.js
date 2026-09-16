@@ -2097,58 +2097,52 @@ copyButton.addEventListener("click", async function(){
 
     feedbackButtons.forEach(function(button){
 
-        button.addEventListener("click", function(){
-const originalFeedback = button.textContent.includes("👍");
-            let feedbackType;
+    button.addEventListener("click", function(){
 
-if(originalFeedback.includes("👍")){
-    feedbackType = "positive";
-}else{
-    feedbackType = "negative";
-}
-            if(originalFeedback.includes("👍")){
+        // Remember which button was clicked BEFORE changing its text
+        const originalFeedback = button.textContent;
 
-                button.textContent = "✅ Helpful";
+        let feedbackType;
 
-            }else{
+        if(originalFeedback.includes("👍")){
+            feedbackType = "positive";
+        }else{
+            feedbackType = "negative";
+        }
 
-                button.textContent = "✅ Thanks";
+        // Change button appearance
+        if(feedbackType === "positive"){
+            button.textContent = "✅ Helpful";
+        }else{
+            button.textContent = "✅ Thanks";
+        }
 
-            }
-// 💾 SAVE AI FEEDBACK
+        // Save AI feedback
+        let aiFeedback =
+            JSON.parse(localStorage.getItem("aiFeedback")) || [];
 
-// Change button appearance after recording the type
-if(feedbackType === "positive"){
+        aiFeedback.push({
+            type: feedbackType,
+            message: lastAIMessage,
+            time: new Date().toISOString()
+        });
 
-    button.textContent = "✅ Helpful";
+        localStorage.setItem(
+            "aiFeedback",
+            JSON.stringify(aiFeedback)
+        );
 
-}else{
+        // Update feedback dashboard
+        updateFeedbackDashboard();
 
-    button.textContent = "✅ Thanks";
-
-}
-
-let aiFeedback =
-    JSON.parse(localStorage.getItem("aiFeedback")) || [];
-
-aiFeedback.push({
-    type: feedbackType,
-    message: lastAIMessage,
-    time: new Date().toISOString()
-});
-
-localStorage.setItem(
-    "aiFeedback",
-    JSON.stringify(aiFeedback)
-);
-            updateFeedbackDashboard();
-            feedbackButtons.forEach(function(otherButton){
-                otherButton.disabled = true;
-            });
-
+        // Disable both feedback buttons
+        feedbackButtons.forEach(function(otherButton){
+            otherButton.disabled = true;
         });
 
     });
+
+});
         chat.scrollTop = chat.scrollHeight;
 
         chatMemory.push({
