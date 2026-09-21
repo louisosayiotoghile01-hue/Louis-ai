@@ -3486,6 +3486,7 @@ function updateFeedbackDashboard(){
 
     let total = aiFeedback.length;
     let feedbackEntries = aiFeedback.length;
+    document.getElementById("feedbackEntries").textContent = feedbackEntries;
 let positiveRate = total === 0
     ? 0
     : Math.round((positive / total) * 100);
