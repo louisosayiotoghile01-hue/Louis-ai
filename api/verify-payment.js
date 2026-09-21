@@ -31,16 +31,18 @@ export default async function handler(req, res) {
         const data = await response.json();
 
         if(
-            !response.ok ||
-            !data.status ||
-            !data.data ||
-            data.data.status !== "success"
-        ){
-            return res.status(400).json({
-                success: false,
-                message: "Payment could not be verified"
-            });
-        }
+    !response.ok ||
+    !data.status ||
+    !data.data ||
+    data.data.status !== "success" ||
+    data.data.amount !== 500000 ||
+    data.data.currency !== "NGN"
+){
+    return res.status(400).json({
+        success: false,
+        message: "Payment could not be verified"
+    });
+}
 
         return res.status(200).json({
             success: true,
