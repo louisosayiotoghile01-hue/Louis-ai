@@ -1,15 +1,101 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Thanks for your order!</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Welcome to Louis AI Pro</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #222;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+
+        .success-box {
+            background: white;
+            width: 90%;
+            max-width: 500px;
+            padding: 40px 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.10);
+        }
+
+        .logo {
+            font-size: 50px;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+            font-size: 30px;
+        }
+
+        p {
+            font-size: 17px;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .pro {
+            display: inline-block;
+            margin: 15px 0;
+            padding: 8px 18px;
+            border-radius: 20px;
+            background: #6c3cff;
+            color: white;
+            font-weight: bold;
+        }
+
+        .button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 14px 25px;
+            background: #6c3cff;
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        .button:hover {
+            opacity: 0.9;
+        }
+    </style>
 </head>
+
 <body>
-  <section>
-    <p>
-      We appreciate your business! If you have any questions, please email
-      <a href="mailto:orders@example.com">orders@example.com</a>.
-    </p>
-  </section>
+
+    <div class="success-box">
+
+        <div class="logo">🤖</div>
+
+        <h1>Welcome to Louis AI Pro!</h1>
+
+        <div class="pro">LOUIS AI PRO</div>
+
+        <p>
+            Your subscription was successful.
+            Thank you for upgrading to Louis AI Pro.
+        </p>
+
+        <p>
+            Your Pro features are now ready.
+            You can return to Louis AI and continue using your assistant.
+        </p>
+
+        <a class="button" href="index.html">
+            Continue to Louis AI
+        </a>
+
+    </div>
+
 </body>
 </html>
