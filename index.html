@@ -587,6 +587,59 @@ alert(
     handler.openIframe();
 }
 </script>
+<script>
+
+// STRIPE PRO ACTIVATION
+
+const stripeSessionId =
+    new URLSearchParams(window.location.search).get("session_id");
+
+if (stripeSessionId) {
+
+    fetch(
+        "/api/verify-stripe-session?session_id=" +
+        encodeURIComponent(stripeSessionId)
+    )
+    .then(response => response.json())
+    .then(data => {
+
+        if (data.success) {
+
+            localStorage.setItem("louisAIPro", "true");
+
+            alert(
+                "Payment verified successfully! 🎉\n\n" +
+                "Welcome to Louis AI Pro!"
+            );
+
+            window.history.replaceState(
+                {},
+                document.title,
+                window.location.pathname
+            );
+
+        } else {
+
+            console.error(
+                "Stripe verification failed:",
+                data.message
+            );
+
+        }
+
+    })
+    .catch(error => {
+
+        console.error(
+            "Stripe verification error:",
+            error
+        );
+
+    });
+}
+
+</script>
+
 </body>
 
     </html>
