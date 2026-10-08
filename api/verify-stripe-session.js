@@ -32,12 +32,23 @@ export default async function handler(req, res) {
         const priceId =
             session.line_items?.data?.[0]?.price?.id;
 
-        return res.status(200).json({
+        if (
+    session.payment_status !== "paid" ||
+    session.mode !== "subscription" ||
+    priceId !== "price_1UNYXa8p9xrArmZiLSkKG9Ia"
+) {
+    return res.status(400).json({
+        success: false,
+        message: "Stripe payment could not be verified"
+    });
+}
+
+return res.status(200).json({
     success: true,
-    payment_status: session.payment_status,
-    mode: session.mode,
-    priceId: priceId,
-    sessionId: session.id
+    message: "Stripe payment verified successfully",
+    sessionId: session.id,
+    customerId: session.customer,
+    subscriptionId: session.subscription
 });
 
         return res.status(200).json({
