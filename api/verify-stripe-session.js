@@ -51,14 +51,6 @@ return res.status(200).json({
     subscriptionId: session.subscription
 });
 
-        return res.status(200).json({
-            success: true,
-            message: "Stripe payment verified successfully",
-            sessionId: session.id,
-            customerId: session.customer,
-            subscriptionId: session.subscription
-        });
-
     } catch (error) {
 
         console.error(
