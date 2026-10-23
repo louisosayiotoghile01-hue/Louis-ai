@@ -1183,6 +1183,36 @@ function saveNaturalMemory(key, value){
         "personalMemory",
         JSON.stringify(personalMemory)
     );
+    // Keep favourite animal memory synchronised
+if (key === "favoriteAnimal") {
+    // Update the current personal memory
+    personalMemory.favoriteAnimal = value;
+
+    localStorage.setItem(
+        "personalMemory",
+        JSON.stringify(personalMemory)
+    );
+
+    // Remove outdated favourite-animal memories
+    let memories = JSON.parse(
+        localStorage.getItem("longTermMemory")
+    ) || [];
+
+    memories = memories.filter(function(item) {
+        let memoryText = typeof item === "string"
+            ? item
+            : String(item.memory || "");
+
+        return !/favo[u]?rite animal|animal is/i.test(
+            memoryText
+        );
+    });
+
+    localStorage.setItem(
+        "longTermMemory",
+        JSON.stringify(memories)
+    );
+    }
 
     // Also keep compatibility with Louis AI's older memory system
     if(key === "name"){
