@@ -1330,31 +1330,58 @@ if(lowerText.startsWith("i live in ")){
     return;
 }
 
+    // FAVOURITE ANIMAL
+    if(
+        lowerText.startsWith("my favourite animal is ") ||
+        lowerText.startsWith("my favorite animal is ") ||
+        lowerText.startsWith("actually, my favourite animal is ") ||
+        lowerText.startsWith("actually, my favorite animal is ") ||
+        lowerText.startsWith("change my favourite animal to ") ||
+        lowerText.startsWith("change my favorite animal to ") ||
+        lowerText.startsWith("i meant ")
+    ){
 
-// FAVOURITE ANIMAL
-if(
-    lowerText.startsWith("my favourite animal is ") ||
-    lowerText.startsWith("my favorite animal is ")
-){
+        let value = "";
+        
+        if(lowerText.startsWith("actually, my favourite animal is ")){
+            value = userText.substring(33).trim();
+        }else if(lowerText.startsWith("actually, my favorite animal is ")){
+            value = userText.substring(32).trim();
+        }else if(lowerText.startsWith("change my favourite animal to ")){
+            value = userText.substring(30).trim();
+        }else if(lowerText.startsWith("change my favorite animal to ")){
+            value = userText.substring(29).trim();
+        }else if(lowerText.startsWith("my favourite animal is ")){
+            value = userText.substring(23).trim();
+        }else if(lowerText.startsWith("my favorite animal is ")){
+            value = userText.substring(22).trim();
+        }else if(lowerText.startsWith("i meant ")){
+            value = userText.substring(8).trim();
+        }
 
-    let prefix = lowerText.startsWith("my favourite animal is ")
-        ? "my favourite animal is "
-        : "my favorite animal is ";
+        value = value.replace(/[.!?]+$/, "").trim();
 
-    let value = userText.substring(prefix.length).trim();
+        if(!value){
+            chat.innerHTML += `
+                <div class="ai-message">
+                    Please tell me your favourite animal.
+                </div>
+            `;
+            chat.scrollTop = chat.scrollHeight;
+            return;
+        }
 
-    saveNaturalMemory("favoriteAnimal", value);
+        saveNaturalMemory("favoriteAnimal", value);
 
-    chat.innerHTML += `
-        <div class="ai-message">
-            I'll remember that your favourite animal is ${value}. 🐾🧠
-        </div>
-    `;
+        chat.innerHTML += `
+            <div class="ai-message">
+                I'll remember that your favourite animal is ${value}. 🐾🧠
+            </div>
+        `;
 
-    chat.scrollTop = chat.scrollHeight;
-    return;
-}
-
+        chat.scrollTop = chat.scrollHeight;
+        return;
+    }
 
 // FAVOURITE FOOTBALL TEAM
 if(
