@@ -1,0 +1,3609 @@
+let lastUserMessage = "";
+let lastAIMessage = "";
+let lastTopic = "";
+let lastQuestion = "";
+let topicHistory = [];
+let conversation = JSON.parse(localStorage.getItem("conversation")) || [];
+// Louis AI conversation memory
+
+let learnedFacts = JSON.parse(localStorage.getItem("learnedFacts")) || {};
+let notes = JSON.parse(localStorage.getItem("notes")) || [];
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+let chatMemory = JSON.parse(localStorage.getItem("chatMemory")) || [];
+let personalMemory =
+    JSON.parse(localStorage.getItem("personalMemory")) || {};
+function savePersonalMemory(key, value){
+
+    personalMemory[key] = value;
+
+    localStorage.setItem(
+        "personalMemory",
+        JSON.stringify(personalMemory)
+    );
+}
+// ==========================================
+// 🧠 LOUIS AI LONG-TERM MEMORY
+// ==========================================
+
+let longTermMemory =
+    JSON.parse(localStorage.getItem("longTermMemory")) || [];
+
+function saveLongTermMemory(memory){
+
+    if(!memory){
+        return;
+    }
+
+    let cleanText = String(memory).trim();
+
+    // Fix corrupted memories
+    cleanText = cleanText.replace(/^y\s+/i, "my ");
+    cleanText = cleanText.replace(/^am building louis ai$/i, "I am building Louis AI");
+
+    // Clean extra spaces
+    cleanText = cleanText.replace(/\s+/g, " ");
+
+    // Remove unnecessary repeated full stops
+    cleanText = cleanText.replace(/\.+$/, ".");
+
+    const newKey = cleanText
+        .toLowerCase()
+        .replace(/[.!?]+$/, "")
+        .replace(/\s+/g, " ")
+        .trim();
+
+    let memories = JSON.parse(
+        localStorage.getItem("longTermMemory")
+    ) || [];
+
+    // Check if this memory already exists
+    const alreadyExists = memories.some(function(item){
+
+        if(!item || !item.memory){
+            return false;
+        }
+
+        let existingText = String(item.memory)
+            .trim()
+            .replace(/^y\s+/i, "my ")
+            .replace(/[.!?]+$/, "")
+            .replace(/\s+/g, " ")
+            .toLowerCase();
+
+        return existingText === newKey;
+    });
+
+    // Don't save duplicates
+    if(alreadyExists){
+        return "I already remember that. 🧠";
+    }
+
+    memories.push({
+        memory: cleanText,
+        date: new Date().toISOString()
+    });
+
+    // Keep only the latest 50 memories
+    if(memories.length > 50){
+        memories = memories.slice(-50);
+    }
+
+    localStorage.setItem(
+        "longTermMemory",
+        JSON.stringify(memories)
+    );
+
+    return "I'll remember that. 🧠";
+}
+
+function getLongTermMemory(){
+
+    return JSON.parse(
+        localStorage.getItem("longTermMemory")
+    ) || [];
+}
+// ==========================================
+// 🧠 AUTOMATIC LONG-TERM MEMORY
+// ==========================================
+
+function detectAndSaveLongTermMemory(message){
+
+    if(!message || typeof message !== "string"){
+        return;
+    }
+
+    const text = message.trim();
+
+    // Explicit "remember" requests
+    if(
+        text.toLowerCase().startsWith("remember that ") ||
+        text.toLowerCase().startsWith("remember ")
+    ){
+
+        let memory = text
+            .replace(/^remember that /i, "")
+            .replace(/^remember /i, "")
+            .trim();
+
+        if(memory){
+            saveLongTermMemory(memory);
+        }
+
+        return;
+    }
+
+    // Favourite information
+    const favouriteMatch = text.match(
+        /^my favourite (.+?) is (.+)$/i
+    );
+
+    if(favouriteMatch){
+
+        const type = favouriteMatch[1].trim();
+        const value = favouriteMatch[2].trim();
+
+        saveLongTermMemory(
+            `The user's favourite ${type} is ${value}.`
+        );
+
+        return;
+    }
+
+    // "My ... is ..." information
+    const personalMatch = text.match(
+        /^my (.+?) is (.+)$/i
+    );
+
+    if(personalMatch){
+
+        const type = personalMatch[1].trim();
+        const value = personalMatch[2].trim();
+
+        // Avoid saving questions as memories
+        if(
+            value &&
+            !value.endsWith("?") &&
+            type.length < 50 &&
+            value.length < 200
+        ){
+
+            saveLongTermMemory(
+                `The user's ${type} is ${value}.`
+            );
+        }
+    }
+}
+function getPersonalMemory(key){
+
+    return personalMemory[key] || null;
+
+}
+
+
+function getAllPersonalMemory(){
+
+    return personalMemory;
+}
+// ==========================================
+// 🧠 LOUIS AI FOLLOW-UP & TOPIC MEMORY
+// ==========================================
+
+function rememberConversation(userMessage, aiMessage){
+
+    lastUserMessage = userMessage;
+    lastAIMessage = aiMessage;
+
+    chatMemory.push({
+        user: userMessage,
+        ai: aiMessage,
+        topic: lastTopic,
+        time: new Date().toISOString()
+    });
+
+    if(chatMemory.length > 20){
+        chatMemory.shift();
+    }
+
+    localStorage.setItem(
+        "chatMemory",
+        JSON.stringify(chatMemory)
+    );
+}
+
+function rememberTopic(topic){
+
+    if(!topic) return;
+
+    lastTopic = topic;
+
+    if(
+        topicHistory.length === 0 ||
+        topicHistory[topicHistory.length - 1] !== topic
+    ){
+        topicHistory.push(topic);
+    }
+
+    if(topicHistory.length > 10){
+        topicHistory.shift();
+    }
+}
+
+function getRecentConversation(){
+
+    return chatMemory
+        .slice(-10)
+        .map(function(item){
+
+            return {
+                user: item.user,
+                ai: item.ai,
+                topic: item.topic
+            };
+
+        });
+
+}
+
+function getFollowUpContext(){
+
+    return {
+        lastUserMessage: lastUserMessage,
+        lastAIMessage: lastAIMessage,
+        lastTopic: lastTopic,
+        lastQuestion: lastQuestion,
+        topicHistory: topicHistory.slice(-10),
+        recentConversation: getRecentConversation()
+    };
+
+}
+const synonyms = {
+    "js": "javascript",
+    "artificial intelligence": "ai",
+    "hypertext markup language": "html",
+    "cascading style sheets": "css"
+};
+const personality = {
+    greetings: [
+        "Hello! I'm Louis AI. How can I help you today?",
+        "Hi! It's great to see you again!",
+        "Welcome back! What would you like to do today?",
+        "Hello! I'm ready to help with anything you need.",
+        "Hi there! Let's build something amazing together."
+    ],
+
+    thanks: [
+        "You're welcome!",
+        "Happy to help!",
+        "Anytime!",
+        "I'm glad I could help.",
+        "It's my pleasure."
+    ],
+
+    goodbye: [
+        "Goodbye! Have a wonderful day.",
+        "See you next time!",
+        "Take care!",
+        "Bye! I'll be here when you need me."
+    ]
+};
+function randomResponse(list){
+    return list[Math.floor(Math.random() * list.length)];
+}
+
+let knowledge = {};
+let learnedQuestions = JSON.parse(localStorage.getItem("learnedQuestions")) || {};
+function detectIntent(text){
+
+    text = text.toLowerCase();
+
+    if(text.includes("time"))
+        return "time";
+
+    if(text.includes("date"))
+        return "date";
+
+    if(text.includes("note"))
+        return "notes";
+
+    if(text.includes("task"))
+        return "tasks";
+
+    if(text.startsWith("search "))
+        return "search";
+
+    if(text.includes("hello") ||
+       text.includes("hi") ||
+       text.includes("hey"))
+        return "greeting";
+
+    if(text.includes("thank"))
+        return "thanks";
+
+    if(text.includes("bye") ||
+       text.includes("goodbye"))
+        return "goodbye";
+
+    if(text.includes("who") ||
+       text.includes("what") ||
+       text.includes("where") ||
+       text.includes("when") ||
+       text.includes("why") ||
+       text.includes("tell me") ||
+       text.includes("explain"))
+        return "knowledge";
+
+    return "chat";
+}
+function getSavedMemory(){
+
+    let memory = [];
+
+    let userName = localStorage.getItem("userName");
+    let favoriteColor = localStorage.getItem("favoriteColor");
+    let favoriteFood = localStorage.getItem("favoriteFood");
+    let birthday = localStorage.getItem("birthday");
+    let hobby = localStorage.getItem("hobby");
+    let userCity = localStorage.getItem("userCity");
+    let favoriteAnimal = localStorage.getItem("favoriteAnimal");
+let favoriteFootballTeam =
+    localStorage.getItem("favoriteFootballTeam");
+    if(userName){
+        memory.push("User's name: " + userName);
+    }
+
+    if(favoriteColor){
+        memory.push("User's favourite color: " + favoriteColor);
+    }
+
+    if(favoriteFood){
+        memory.push("User's favourite food: " + favoriteFood);
+    }
+
+    if(birthday){
+        memory.push("User's birthday: " + birthday);
+    }
+
+    if(hobby){
+        memory.push("User's hobby: " + hobby);
+    }
+
+    if(userCity){
+        memory.push("User lives in: " + userCity);
+    }
+
+    if(favoriteAnimal){
+        memory.push("User's favourite animal: " + favoriteAnimal);
+    }
+if(favoriteFootballTeam){
+    memory.push(
+        "User's favourite football team: " +
+        favoriteFootballTeam
+    );
+}
+    return memory.join("\n");
+}
+async function getAIResponse(message, history = []) {
+
+    try {
+
+        const response = await fetch("/api/chat", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+
+                message: message,
+
+                // Send conversation history correctly
+                history: history,
+// Send follow-up conversation context
+followUpContext: getFollowUpContext(),
+                // Send Louis AI's personal memory
+                memory: {
+    personal: getAllPersonalMemory(),
+    longTerm: getLongTermMemory()
+},
+
+proUser: localStorage.getItem("louisAIPro") === "true"
+
+            })
+
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+
+            console.error("Louis AI API Error:", data);
+
+            return "I'm having trouble connecting to my AI brain right now.";
+
+        }
+
+        return data.reply || "I didn't receive a response.";
+
+    } catch (error) {
+
+        console.error("Louis AI Connection Error:", error);
+
+        return "I couldn't connect to Louis AI's server right now.";
+
+    }
+
+}
+async function loadKnowledge() {
+
+    try {
+
+        const response = await fetch("knowledge.json");
+
+        if (response.ok) {
+            knowledge = await response.json();
+            console.log("Knowledge loaded successfully.");
+        }
+
+    } catch (error) {
+        console.log("Could not load knowledge.json");
+    }
+
+}
+// ========================================
+// CLEAN DUPLICATE LONG-TERM MEMORIES
+// ========================================
+
+function cleanDuplicateLongTermMemories(){
+
+    let memories = JSON.parse(
+        localStorage.getItem("longTermMemory")
+    ) || [];
+
+    const uniqueMemories = [];
+    const seen = new Set();
+
+    memories.forEach(function(item){
+
+        if(!item || !item.memory){
+            return;
+        }
+
+        let cleanText = String(item.memory).trim();
+
+        // Fix corrupted memories
+        cleanText = cleanText.replace(/^y\s+/i, "my ");
+        cleanText = cleanText.replace(
+            /^am building louis ai\.?$/i,
+            "I am building Louis AI."
+        );
+
+        // Normalize spelling
+        cleanText = cleanText.replace(
+            /\bfavourite\b/gi,
+            "favorite"
+        );
+
+        cleanText = cleanText.replace(
+            /\bcolour\b/gi,
+            "color"
+        );
+
+        // Normalize "The user's" to "my"
+        cleanText = cleanText.replace(
+            /^the user's\s+/i,
+            "my "
+        );
+
+        // Normalize "user's" to "my"
+        cleanText = cleanText.replace(
+            /^user's\s+/i,
+            "my "
+        );
+
+        // Normalize "I like" and "like"
+        cleanText = cleanText.replace(
+            /^like\s+/i,
+            "I like "
+        );
+        
+        // Normalize "favorite" to "my favorite"
+cleanText = cleanText.replace(
+    /^favorite\s+/i,
+    "my favorite "
+);
+
+        // Clean spaces
+        cleanText = cleanText
+            .replace(/\s+/g, " ")
+            .trim();
+
+        // Clean punctuation
+        cleanText = cleanText
+            .replace(/[.!?]+$/, "")
+            .trim();
+
+        // Create normalized duplicate key
+        const key = cleanText
+            .toLowerCase()
+            .replace(/\s+/g, " ")
+            .trim();
+
+        // Keep only one copy
+        if(!seen.has(key)){
+
+            seen.add(key);
+
+            uniqueMemories.push({
+                memory: cleanText + ".",
+                date: item.date || new Date().toISOString()
+            });
+
+        }
+
+    });
+
+    // Keep latest 50 unique memories
+    const finalMemories = uniqueMemories.slice(-50);
+
+    localStorage.setItem(
+        "longTermMemory",
+        JSON.stringify(finalMemories)
+    );
+}
+cleanDuplicateLongTermMemories();
+
+// ==========================================
+// 🧠 LOUIS AI MEMORY CONTROL
+// ==========================================
+
+function showLongTermMemory(){
+
+    const memories = getLongTermMemory();
+
+    if(!Array.isArray(memories) || memories.length === 0){
+        return "I don't have any long-term memories saved about you yet.";
+    }
+
+    let reply = "Here is what I remember about you:\n\n";
+
+    memories.forEach((memory, index) => {
+
+        if(typeof memory === "string"){
+            reply += `${index + 1}. ${memory}\n`;
+            return;
+        }
+
+        if(memory && typeof memory === "object"){
+
+            const key = memory.key || memory.type || memory.category || "Memory";
+            const value = memory.value || memory.text || memory.memory || "";
+
+            if(value){
+                reply += `${index + 1}. ${key}: ${value}\n`;
+            }
+        }
+    });
+
+    return reply.trim();
+}
+
+
+function forgetLongTermMemory(searchText){
+
+    let memories = getLongTermMemory();
+
+    if(!Array.isArray(memories) || memories.length === 0){
+        return "I don't have any long-term memories saved.";
+    }
+
+    const search = searchText
+        .toLowerCase()
+        .trim();
+
+    const originalLength = memories.length;
+
+    memories = memories.filter(memory => {
+
+        const memoryText =
+            typeof memory === "string"
+                ? memory
+                : JSON.stringify(memory);
+
+        return !memoryText
+            .toLowerCase()
+            .includes(search);
+    });
+
+    if(memories.length === originalLength){
+        return `I couldn't find a saved memory matching "${searchText}".`;
+    }
+
+    localStorage.setItem(
+        "longTermMemory",
+        JSON.stringify(memories)
+    );
+
+    return `I've forgotten the memory matching "${searchText}".`;
+}
+function showTyping(){
+    const chat = document.getElementById("chat");
+
+    const typing = document.createElement("div");
+    typing.className = "typing";
+    typing.id = "typingIndicator";
+    typing.innerText = "Louis AI is typing...";
+
+    chat.appendChild(typing);
+    chat.scrollTop = chat.scrollHeight;
+}
+
+function hideTyping(){
+    const typing = document.getElementById("typingIndicator");
+
+    if(typing){
+        typing.remove();
+    }
+}
+function isLouisAIPro(){
+    return localStorage.getItem("louisAIPro") === "true";
+}
+function showProBadge(){
+
+    if(!isLouisAIPro()){
+        return;
+    }
+
+    const chat = document.getElementById("chat");
+
+    const badge = document.createElement("div");
+
+    badge.className = "pro-badge";
+    badge.innerText = "💎 Louis AI Pro";
+
+    chat.appendChild(badge);
+}
+showProBadge();
+console.log("Louis AI Pro status:", isLouisAIPro());
+async function sendMessage(){
+    const input = document.getElementById("userInput");
+    const chat = document.getElementById("chat");
+
+    const userText = input.value.trim();
+
+if(userText === ""){
+    return;
+}
+    const proUser = isLouisAIPro();
+
+console.log("Is Louis AI Pro user:", proUser);
+    if(proUser){
+    console.log("💎 Louis AI Pro features are unlocked.");
+    }
+    // ==========================================
+// 🧠 MEMORY CONTROL COMMANDS
+// ==========================================
+
+const lowerText = userText.toLowerCase();
+// 💎 LOUIS AI PRO FEATURES
+if(
+    proUser &&
+    (
+        lowerText === "what pro features do i have" ||
+        lowerText === "what pro features do i have?" ||
+        lowerText === "show my pro features" ||
+        lowerText === "what are my pro features"
+    )
+){
+
+    const proFeaturesDiv = document.createElement("div");
+
+    proFeaturesDiv.className = "ai-message";
+
+    proFeaturesDiv.innerHTML = `
+        💎 <strong>Louis AI Pro</strong><br><br>
+        Your Pro features include:<br>
+        ✅ Advanced AI features<br>
+        ✅ Enhanced long-term memory<br>
+        ✅ Voice interaction<br>
+        ✅ Higher usage limits<br>
+        ✅ Priority access to new features
+    `;
+
+    chat.appendChild(proFeaturesDiv);
+
+    chat.scrollTop = chat.scrollHeight;
+
+    input.value = "";
+
+    return;
+}
+if(
+    lowerText === "what do you remember about me" ||
+    lowerText === "what do you remember about me?" ||
+    lowerText === "what do you remember" ||
+    lowerText === "show my memories" ||
+    lowerText === "show what you remember"
+){
+const userMemoryDiv = document.createElement("div");
+
+userMemoryDiv.className = "user-message";
+
+userMemoryDiv.textContent = userText;
+
+chat.appendChild(userMemoryDiv);
+    
+    const memoryReply = showLongTermMemory();
+
+    const aiMemoryDiv = document.createElement("div");
+
+    aiMemoryDiv.className = "ai-message";
+
+    aiMemoryDiv.textContent = memoryReply;
+
+    chat.appendChild(aiMemoryDiv);
+
+    chat.scrollTop = chat.scrollHeight;
+
+    input.value = "";
+
+    return;
+}
+
+
+if(lowerText.startsWith("forget ")){
+
+    const memoryToForget =
+        userText.substring(7).trim();
+
+    if(memoryToForget){
+
+        const forgetReply =
+            forgetLongTermMemory(memoryToForget);
+
+        const aiForgetDiv =
+            document.createElement("div");
+
+        aiForgetDiv.className = "ai-message";
+
+        aiForgetDiv.textContent = forgetReply;
+
+        chat.appendChild(aiForgetDiv);
+
+        chat.scrollTop = chat.scrollHeight;
+
+        input.value = "";
+
+        return;
+    }
+}
+   try {
+    detectAndSaveLongTermMemory(userText);
+} catch(error) {
+    console.error("Memory error:", error);
+}
+    // SHOW USER MESSAGE FIRST
+const userMessageDiv = document.createElement("div");
+
+userMessageDiv.className = "user-message";
+
+userMessageDiv.textContent = userText;
+
+chat.appendChild(userMessageDiv);
+
+chat.scrollTop = chat.scrollHeight;
+
+// Clear input
+input.value = "";
+    // Clear the input immediately
+    // =====================================
+// LOUIS AI MEMORY DASHBOARD
+// =====================================
+
+if(
+    lowerText === "show my memories" ||
+    lowerText === "show my memory" ||
+    lowerText === "what do you remember" ||
+    lowerText === "what do you know about"
+){
+
+    const memories = getAllPersonalMemory();
+
+    let memoryList = "";
+
+    const memoryNames = {
+        name: "👤 Name",
+        favoriteColor: "🎨 Favourite colour",
+        favouriteColor: "🎨 Favourite colour",
+        favoriteFood: "🍽️ Favourite food",
+        favouriteFood: "🍽️ Favourite food",
+        birthday: "🎂 Birthday",
+        hobby: "🎯 Hobby",
+        location: "📍 Location",
+        favoriteAnimal: "🐾 Favourite animal",
+        favoriteFootballTeam: "⚽ Favourite football team"
+    };
+
+    for(let key in memories){
+
+        if(memories[key]){
+
+            let label = memoryNames[key] || key;
+
+            memoryList += `
+    <div style="margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid #ccc;">
+        <strong>${label}:</strong>
+        ${memories[key]}
+
+        <br><br>
+
+        <button
+            onclick="document.getElementById('userInput').value='forget memory ${key}'; sendMessage();"
+            style="
+                padding:8px 14px;
+                border:none;
+                border-radius:8px;
+                cursor:pointer;
+                font-size:14px;
+            "
+        >
+            🗑️ Forget
+        </button>
+    </div>
+`;
+        }
+    }
+
+    if(memoryList === ""){
+
+        memoryList = `
+            <div>
+                I don't have any personal memories about you yet. 🧠
+            </div>
+        `;
+    }
+
+    chat.innerHTML += `
+        <div class="ai-message">
+            <strong>🧠 Here's what I remember about you:</strong>
+            <br><br>
+            ${memoryList}
+        </div>
+    `;
+
+    chat.scrollTop = chat.scrollHeight;
+
+    return;
+}
+    // =====================================
+// FORGET ALL PERSONAL MEMORIES
+// =====================================
+
+if(
+    lowerText === "forget all my memories" ||
+    lowerText === "forget all my memory" ||
+    lowerText === "forget everything" ||
+    lowerText === "forget everything i told you"
+){
+
+    const memoryKeys = [
+        "userName",
+        "name",
+        "favoriteColor",
+        "favouriteColor",
+        "favoriteFood",
+        "favouriteFood",
+        "birthday",
+        "hobby",
+        "location",
+        "favoriteAnimal",
+        "favouriteAnimal",
+        "favoriteFootballTeam",
+        "favouriteFootballTeam",
+        "personalMemory",
+        "personalMemories"
+    ];
+
+    memoryKeys.forEach(function(key){
+        localStorage.removeItem(key);
+    });
+
+    chat.innerHTML += `
+        <div class="ai-message">
+            🗑️ I've forgotten all your personal memories.
+            🧠
+        </div>
+    `;
+
+    chat.scrollTop = chat.scrollHeight;
+
+    return;
+        }
+    // =====================================
+// LOUIS AI CHANGE MEMORY
+// =====================================
+
+if(
+    lowerText.startsWith("change my ") &&
+    lowerText.includes(" to ")
+){
+
+    const changeText = userText.trim();
+
+    const parts = changeText.substring(9).split(" to ");
+
+    const memoryName = parts[0].trim().toLowerCase();
+    const newValue = parts.slice(1).join(" to ").trim();
+
+    const memoryMap = {
+
+        "name": "name",
+
+        "favourite colour": "favoriteColor",
+        "favorite colour": "favoriteColor",
+        "favourite color": "favoriteColor",
+        "favorite color": "favoriteColor",
+
+        "favourite food": "favoriteFood",
+        "favorite food": "favoriteFood",
+
+        "birthday": "birthday",
+
+        "hobby": "hobby",
+
+        "location": "location",
+
+        "favourite animal": "favoriteAnimal",
+        "favorite animal": "favoriteAnimal",
+
+        "favourite football team": "favoriteFootballTeam",
+        "favorite football team": "favoriteFootballTeam"
+    };
+
+    const memoryKey = memoryMap[memoryName];
+
+    if(memoryKey && newValue){
+
+        saveNaturalMemory(memoryKey, newValue);
+
+        chat.innerHTML += `
+            <div class="ai-message">
+                ✅ I've updated your ${memoryName} to <strong>${newValue}</strong>. 🧠
+            </div>
+        `;
+
+        chat.scrollTop = chat.scrollHeight;
+
+        return;
+    }
+}
+   // =====================================
+// FORGET MEMORY BY INTERNAL KEY
+// =====================================
+
+if(lowerText.startsWith("forget memory ")){
+
+    const requestedKey = lowerText
+        .substring(14)
+        .trim();
+
+    // Convert lowercase command into the real storage key
+    const keyMap = {
+
+        "name": "name",
+
+        "favoritecolor": "favoriteColor",
+        "favouritecolor": "favoriteColor",
+
+        "favoritefood": "favoriteFood",
+        "favouritefood": "favoriteFood",
+
+        "birthday": "birthday",
+
+        "hobby": "hobby",
+
+        "location": "location",
+
+        "favoriteanimal": "favoriteAnimal",
+        "favouriteanimal": "favoriteAnimal",
+
+        "favoritefootballteam": "favoriteFootballTeam",
+        "favouritefootballteam": "favoriteFootballTeam"
+    };
+
+    const memoryKey = keyMap[requestedKey];
+
+    if(memoryKey){
+
+        const memories = getAllPersonalMemory();
+
+        if(memories[memoryKey]){
+
+            delete memories[memoryKey];
+
+            localStorage.setItem(
+                "personalMemory",
+                JSON.stringify(memories)
+            );
+
+            // Remove old storage keys too
+            localStorage.removeItem(memoryKey);
+
+            if(memoryKey === "name"){
+                localStorage.removeItem("userName");
+            }
+
+            if(memoryKey === "location"){
+                localStorage.removeItem("userCity");
+            }
+
+            if(memoryKey === "favoriteColor"){
+                localStorage.removeItem("favouriteColor");
+            }
+
+            if(memoryKey === "favoriteFood"){
+                localStorage.removeItem("favouriteFood");
+            }
+
+            if(memoryKey === "favoriteAnimal"){
+                localStorage.removeItem("favouriteAnimal");
+            }
+
+            if(memoryKey === "favoriteFootballTeam"){
+                localStorage.removeItem("favouriteFootballTeam");
+            }
+
+            chat.innerHTML += `
+                <div class="ai-message">
+                    🗑️ I've forgotten that memory. 🧠
+                </div>
+            `;
+
+        }else{
+
+            chat.innerHTML += `
+                <div class="ai-message">
+                    🧠 I don't have that memory saved.
+                </div>
+            `;
+
+        }
+
+    }else{
+
+        chat.innerHTML += `
+            <div class="ai-message">
+                🧠 I don't recognize that memory.
+            </div>
+        `;
+
+    }
+
+    chat.scrollTop = chat.scrollHeight;
+
+    return;
+        }
+    // =====================================
+// LOUIS AI FORGET MEMORY
+// =====================================
+
+if(lowerText.startsWith("forget my ")){
+
+    const forgetName = lowerText
+        .substring(10)
+        .trim();
+
+    const memoryMap = {
+
+        "name": "name",
+
+        "favourite colour": "favoriteColor",
+        "favorite colour": "favoriteColor",
+        "favourite color": "favoriteColor",
+        "favorite color": "favoriteColor",
+
+        "favourite food": "favoriteFood",
+        "favorite food": "favoriteFood",
+
+        "birthday": "birthday",
+
+        "hobby": "hobby",
+
+        "location": "location",
+
+        "favourite animal": "favoriteAnimal",
+        "favorite animal": "favoriteAnimal",
+
+        "favourite football team": "favoriteFootballTeam",
+        "favorite football team": "favoriteFootballTeam"
+    };
+
+    const memoryKey = memoryMap[forgetName];
+
+    if(memoryKey){
+
+        const memories = getAllPersonalMemory();
+
+        if(memories[memoryKey]){
+
+            delete memories[memoryKey];
+
+            localStorage.setItem(
+                "personalMemory",
+                JSON.stringify(memories)
+            );
+
+            // Keep older storage keys synchronized
+            localStorage.removeItem(memoryKey);
+
+            if(memoryKey === "name"){
+                localStorage.removeItem("userName");
+            }
+
+            if(memoryKey === "location"){
+                localStorage.removeItem("userCity");
+            }
+
+            chat.innerHTML += `
+                <div class="ai-message">
+                    🗑️ I've forgotten your <strong>${forgetName}</strong>.
+                </div>
+            `;
+
+        }else{
+
+            chat.innerHTML += `
+                <div class="ai-message">
+                    🧠 I don't have a saved memory for your
+                    <strong>${forgetName}</strong>.
+                </div>
+            `;
+        }
+
+        chat.scrollTop = chat.scrollHeight;
+
+        return;
+    }
+}
+    // ===============================
+// NATURAL PERSONAL MEMORY SYSTEM
+// ===============================
+
+function saveNaturalMemory(key, value){
+
+    value = value.trim();
+
+    if(!value) return;
+
+    // Save to personal memory
+    personalMemory[key] = value;
+
+    localStorage.setItem(
+        "personalMemory",
+        JSON.stringify(personalMemory)
+    );
+    // Keep favourite animal memory synchronised
+if (key === "favoriteAnimal") {
+    // Update the current personal memory
+    personalMemory.favoriteAnimal = value;
+
+    localStorage.setItem(
+        "personalMemory",
+        JSON.stringify(personalMemory)
+    );
+
+    // Remove outdated favourite-animal memories
+    let memories = JSON.parse(
+        localStorage.getItem("longTermMemory")
+    ) || [];
+
+    memories = memories.filter(function(item) {
+        let memoryText = typeof item === "string"
+            ? item
+            : String(item.memory || "");
+
+        return !/favo[u]?rite animal|animal is/i.test(
+            memoryText
+        );
+    });
+
+    localStorage.setItem(
+        "longTermMemory",
+        JSON.stringify(memories)
+    );
+    }
+
+    // Also keep compatibility with Louis AI's older memory system
+    if(key === "name"){
+        localStorage.setItem("userName", value);
+    }
+
+    if(key === "favoriteColor"){
+        localStorage.setItem("favoriteColor", value);
+    }
+
+    if(key === "favoriteFood"){
+        localStorage.setItem("favoriteFood", value);
+    }
+
+    if(key === "hobby"){
+        localStorage.setItem("hobby", value);
+    }
+
+    if(key === "location"){
+        localStorage.setItem("userCity", value);
+    }
+
+    if(key === "favoriteAnimal"){
+        localStorage.setItem("favoriteAnimal", value);
+    }
+
+    if(key === "favoriteFootballTeam"){
+        localStorage.setItem("favoriteFootballTeam", value);
+    }
+}
+
+
+// NAME
+if(lowerText.startsWith("my name is ")){
+
+    let value = userText.substring(11).trim();
+
+    saveNaturalMemory("name", value);
+
+    chat.innerHTML += `
+        <div class="ai-message">
+            Nice to remember you, ${value}! 🧠
+        </div>
+    `;
+
+    chat.scrollTop = chat.scrollHeight;
+    return;
+}
+
+
+// FAVOURITE COLOUR
+if(
+    lowerText.startsWith("my favourite colour is ") ||
+    lowerText.startsWith("my favorite color is ") ||
+    lowerText.startsWith("my favourite color is ") ||
+    lowerText.startsWith("my favorite colour is ")
+){
+
+    let prefix = "";
+
+    if(lowerText.startsWith("my favourite colour is "))
+        prefix = "my favourite colour is ";
+
+    else if(lowerText.startsWith("my favorite color is "))
+        prefix = "my favorite color is ";
+
+    else if(lowerText.startsWith("my favourite color is "))
+        prefix = "my favourite color is ";
+
+    else
+        prefix = "my favorite colour is ";
+
+    let value = userText.substring(prefix.length).trim();
+
+    saveNaturalMemory("favoriteColor", value);
+
+    chat.innerHTML += `
+        <div class="ai-message">
+            I'll remember that your favourite colour is ${value}. 🎨🧠
+        </div>
+    `;
+
+    chat.scrollTop = chat.scrollHeight;
+    return;
+}
+
+
+// FAVOURITE FOOD
+if(
+    lowerText.startsWith("my favourite food is ") ||
+    lowerText.startsWith("my favorite food is ")
+){
+
+    let prefix = lowerText.startsWith("my favourite food is ")
+        ? "my favourite food is "
+        : "my favorite food is ";
+
+    let value = userText.substring(prefix.length).trim();
+
+    saveNaturalMemory("favoriteFood", value);
+
+    chat.innerHTML += `
+        <div class="ai-message">
+            I'll remember that your favourite food is ${value}. 🍽️🧠
+        </div>
+    `;
+
+    chat.scrollTop = chat.scrollHeight;
+    return;
+}
+
+
+// HOBBY
+if(lowerText.startsWith("my hobby is ")){
+
+    let value = userText.substring(12).trim();
+
+    saveNaturalMemory("hobby", value);
+
+    chat.innerHTML += `
+        <div class="ai-message">
+            I'll remember that your hobby is ${value}. 🎯🧠
+        </div>
+    `;
+
+    chat.scrollTop = chat.scrollHeight;
+    return;
+}
+
+
+// LOCATION
+if(lowerText.startsWith("i live in ")){
+
+    let value = userText.substring(10).trim();
+
+    saveNaturalMemory("location", value);
+
+    chat.innerHTML += `
+        <div class="ai-message">
+            I'll remember that you live in ${value}. 📍🧠
+        </div>
+    `;
+
+    chat.scrollTop = chat.scrollHeight;
+    return;
+}
+
+    // FAVOURITE ANIMAL
+    if(
+        lowerText.startsWith("my favourite animal is ") ||
+        lowerText.startsWith("my favorite animal is ") ||
+        lowerText.startsWith("actually, my favourite animal is ") ||
+        lowerText.startsWith("actually, my favorite animal is ") ||
+        lowerText.startsWith("change my favourite animal to ") ||
+        lowerText.startsWith("change my favorite animal to ") ||
+        lowerText.startsWith("i meant ")
+    ){
+
+        let value = "";
+        
+        if(lowerText.startsWith("actually, my favourite animal is ")){
+            value = userText.substring(33).trim();
+        }else if(lowerText.startsWith("actually, my favorite animal is ")){
+            value = userText.substring(32).trim();
+        }else if(lowerText.startsWith("change my favourite animal to ")){
+            value = userText.substring(30).trim();
+        }else if(lowerText.startsWith("change my favorite animal to ")){
+            value = userText.substring(29).trim();
+        }else if(lowerText.startsWith("my favourite animal is ")){
+            value = userText.substring(23).trim();
+        }else if(lowerText.startsWith("my favorite animal is ")){
+            value = userText.substring(22).trim();
+        }else if(lowerText.startsWith("i meant ")){
+            value = userText.substring(8).trim();
+        }
+
+        value = value.replace(/[.!?]+$/, "").trim();
+
+        if(!value){
+            chat.innerHTML += `
+                <div class="ai-message">
+                    Please tell me your favourite animal.
+                </div>
+            `;
+            chat.scrollTop = chat.scrollHeight;
+            return;
+        }
+
+        saveNaturalMemory("favoriteAnimal", value);
+
+        chat.innerHTML += `
+            <div class="ai-message">
+                I'll remember that your favourite animal is ${value}. 🐾🧠
+            </div>
+        `;
+
+        chat.scrollTop = chat.scrollHeight;
+        return;
+    }
+
+// FAVOURITE FOOTBALL TEAM
+if(
+    lowerText.startsWith("my favourite football team is ") ||
+    lowerText.startsWith("my favorite football team is ")
+){
+
+    let prefix = lowerText.startsWith("my favourite football team is ")
+        ? "my favourite football team is "
+        : "my favorite football team is ";
+
+    let value = userText.substring(prefix.length).trim();
+
+    saveNaturalMemory("favoriteFootballTeam", value);
+
+    chat.innerHTML += `
+        <div class="ai-message">
+            I'll remember that your favourite football team is ${value}. ⚽🧠
+        </div>
+    `;
+
+    chat.scrollTop = chat.scrollHeight;
+    return;
+}
+
+
+// SUPPORTING A FOOTBALL TEAM
+if(lowerText.startsWith("i support ")){
+
+    let value = userText.substring(10).trim();
+
+    saveNaturalMemory("favoriteFootballTeam", value);
+
+    chat.innerHTML += `
+        <div class="ai-message">
+            I'll remember that you support ${value}. ⚽🧠
+        </div>
+    `;
+
+    chat.scrollTop = chat.scrollHeight;
+    return;
+            }
+// NATURAL FOOTBALL TEAM MEMORY
+
+if(
+    lowerText.startsWith("my favourite football team is ") ||
+    lowerText.startsWith("my favorite football team is ")
+){
+
+    let phrase = lowerText.startsWith(
+        "my favourite football team is "
+    )
+        ? "my favourite football team is "
+        : "my favorite football team is ";
+
+    let team = userText.substring(phrase.length).trim();
+
+    if(team){
+
+        savePersonalMemory(
+            "favoriteFootballTeam",
+            team
+        );
+
+        // Keep the old storage too
+        localStorage.setItem(
+            "favoriteFootballTeam",
+            team
+        );
+
+    }
+}
+    // Remember user's message
+    lastUserMessage = userText;
+
+    chatMemory.push({
+        role: "user",
+        message: userText
+    });
+
+    if(chatMemory.length > 20){
+        chatMemory.shift();
+    }
+
+    localStorage.setItem(
+        "chatMemory",
+        JSON.stringify(chatMemory)
+    );
+
+    conversation.push({
+        sender: "user",
+        message: userText
+    });
+
+    if(conversation.length > 20){
+        conversation.shift();
+    }
+
+    localStorage.setItem(
+        "conversation",
+        JSON.stringify(conversation)
+    );
+// UNIVERSAL REMEMBER THAT MEMORY
+
+const rememberText = userText.trim();
+const rememberLower = rememberText.toLowerCase();
+
+if(rememberLower.startsWith("remember that ")){
+
+    const memoryContent = rememberText.substring(14).trim();
+
+    const memoryLower = memoryContent.toLowerCase();
+
+    let memoryKey = "";
+    let memoryValue = "";
+
+    // BIRTHDAY
+    if(memoryLower.startsWith("my birthday is ")){
+
+        memoryKey = "birthday";
+
+        memoryValue = memoryContent.substring(15).trim();
+    }
+
+    // NAME
+    else if(memoryLower.startsWith("my name is ")){
+
+        memoryKey = "name";
+
+        memoryValue = memoryContent.substring(11).trim();
+    }
+
+    // FAVOURITE FOOD
+    else if(
+        memoryLower.startsWith("my favourite food is ") ||
+        memoryLower.startsWith("my favorite food is ")
+    ){
+
+        memoryKey = "favoriteFood";
+
+        let start = memoryLower.startsWith("my favourite food is ")
+            ? 21
+            : 20;
+
+        memoryValue = memoryContent.substring(start).trim();
+    }
+// FAVOURITE COLOUR
+else if(
+    memoryLower.startsWith("my favourite colour is ") ||
+    memoryLower.startsWith("my favorite color is ") ||
+    memoryLower.startsWith("my favourite color is ") ||
+    memoryLower.startsWith("my favorite colour is ")
+){
+
+    memoryKey = "favoriteColor";
+
+    let start =
+        memoryLower.startsWith("my favourite colour is ")
+            ? 23
+            : memoryLower.startsWith("my favorite color is ")
+                ? 21
+                : memoryLower.startsWith("my favourite color is ")
+                    ? 22
+                    : 22;
+
+    memoryValue = memoryContent.substring(start).trim();
+}
+    // HOBBY
+    else if(memoryLower.startsWith("my hobby is ")){
+
+        memoryKey = "hobby";
+
+        memoryValue = memoryContent.substring(12).trim();
+    }
+
+    // FAVOURITE ANIMAL
+    else if(
+        memoryLower.startsWith("my favourite animal is ") ||
+        memoryLower.startsWith("my favorite animal is ")
+    ){
+
+        memoryKey = "favoriteAnimal";
+
+        let start = memoryLower.startsWith("my favourite animal is ")
+            ? 23
+            : 22;
+
+        memoryValue = memoryContent.substring(start).trim();
+    }
+
+    // LOCATION
+    else if(memoryLower.startsWith("i live in ")){
+
+        memoryKey = "location";
+
+        memoryValue = memoryContent.substring(10).trim();
+    }
+// UNIVERSAL PERSONAL MEMORY
+
+if(!memoryKey && !memoryValue){
+
+    const genericMemory = memoryContent.trim();
+
+    const separators = [
+        " is ",
+        " are ",
+        " likes ",
+        " loves ",
+        " supports ",
+        " prefers "
+    ];
+
+    let foundSeparator = null;
+
+    for(let separator of separators){
+
+        if(genericMemory.toLowerCase().includes(separator)){
+            foundSeparator = separator;
+            break;
+        }
+    }
+
+    if(foundSeparator){
+
+        const position = genericMemory
+            .toLowerCase()
+            .indexOf(foundSeparator);
+
+        const key = genericMemory
+            .substring(0, position)
+            .trim();
+
+        const value = genericMemory
+            .substring(position + foundSeparator.length)
+            .trim();
+
+        if(key && value){
+
+            memoryKey = key;
+            memoryValue = value;
+        }
+    }
+}
+    // SAVE MEMORY
+    if(memoryKey && memoryValue){
+
+        savePersonalMemory(memoryKey, memoryValue);
+
+        chat.innerHTML += `
+            <div class="ai-message">
+                I'll remember that your ${memoryKey} is ${memoryValue}. 🧠
+            </div>
+        `;
+
+        chat.scrollTop = chat.scrollHeight;
+
+        return;
+    }
+}
+// BIRTHDAY MEMORY COMMAND
+
+const lowerUserText = userText.toLowerCase();
+
+if(
+    lowerUserText.includes("my birthday is") ||
+    lowerUserText.includes("remember that my birthday is") ||
+    lowerUserText.includes("i was born on")
+){
+
+    let birthday = "";
+
+    if(lowerUserText.includes("my birthday is")){
+
+        birthday = userText.substring(
+    lowerText.indexOf("my birthday is") + 14
+).trim();
+
+    }
+    else if(lowerUserText.includes("i was born on")){
+
+        birthday = userText.substring(
+            lowerUserText.indexOf("i was born on") + 13
+        ).trim();
+
+    }
+
+    if(birthday){
+
+        savePersonalMemory("birthday", birthday);
+
+        chat.innerHTML += `
+            <div class="ai-message">
+                I'll remember your birthday is ${birthday}. 🎂
+            </div>
+        `;
+
+        chat.scrollTop = chat.scrollHeight;
+
+        return;
+    }
+                                  }
+    // LONG-TERM MEMORY COMMAND
+    if(userText.toLowerCase().startsWith("remember that ")){
+
+        const memoryText = userText.substring(15).trim();
+
+        if(memoryText !== ""){
+
+            saveLongTermMemory(memoryText);
+
+            chat.innerHTML += `
+                <div class="ai-message">
+                    I'll remember that.
+                </div>
+            `;
+
+            chat.scrollTop = chat.scrollHeight;
+
+            return;
+        }
+    }
+    // GENERAL MEMORY RECALL
+
+if(
+    lowerText.includes("what do you remember about me") ||
+    lowerText.includes("what do you remember about me?") ||
+    lowerText.includes("what do you know about me") ||
+    lowerText.includes("show my memories") ||
+    lowerText.includes("show what you remember") ||
+    lowerText.includes("what have you remembered about me")
+){
+
+    const memories = getLongTermMemory();
+
+    if(memories.length === 0){
+
+        chat.innerHTML += `
+            <div class="ai-message">
+                I don't have any long-term memories about you yet. 🧠
+            </div>
+        `;
+
+    }else{
+
+        let memoryList = "";
+
+        memories.forEach((item, index) => {
+
+            memoryList += `
+                <div style="margin-bottom:10px;">
+                    ${index + 1}. ${item.memory}
+                </div>
+            `;
+
+        });
+
+        chat.innerHTML += `
+            <div class="ai-message">
+                <strong>Here's what I remember about you: 🧠</strong>
+                <br><br>
+                ${memoryList}
+            </div>
+        `;
+    }
+
+    chat.scrollTop = chat.scrollHeight;
+
+    return;
+}
+// DIRECT PERSONAL MEMORY ANSWERS
+    
+// FAVOURITE COLOUR MEMORY
+
+if(
+    lowerText.includes("what is my favourite colour") ||
+    lowerText.includes("what is my favorite color") ||
+    lowerText.includes("what is my favourite color") ||
+    lowerText.includes("what is my favorite colour") ||
+    lowerText.includes("what's my favourite colour") ||
+    lowerText.includes("what's my favorite color")
+){
+
+    const memories = getAllPersonalMemory();
+
+    const color =
+        memories.favoriteColor ||
+        memories.favouriteColor ||
+        memories["favorite_color"] ||
+        memories["favourite_color"];
+
+    if(color){
+
+        chat.innerHTML += `
+            <div class="ai-message">
+                Your favourite colour is ${color}. 🎨
+            </div>
+        `;
+
+    }else{
+
+        chat.innerHTML += `
+            <div class="ai-message">
+                I don't have your favourite colour saved yet. 🎨
+            </div>
+        `;
+    }
+
+    chat.scrollTop = chat.scrollHeight;
+
+    return;
+            }
+    // FAVORITE FOOD MEMORY
+
+if(
+    lowerText.includes("what is my favorite food") ||
+    lowerText.includes("what is my favourite food")
+){
+
+    const memories = getAllPersonalMemory();
+
+    let food =
+        memories.favoriteFood ||
+        memories.favouriteFood ||
+        memories["favorite food"] ||
+        memories["favourite food"];
+
+    if(food){
+
+        chat.innerHTML += `
+            <div class="ai-message">
+                Your favorite food is ${food}. 🍽️
+            </div>
+        `;
+
+        chat.scrollTop = chat.scrollHeight;
+
+        return;
+    }
+}
+    // BIRTHDAY MEMORY
+
+if(
+    lowerText.includes("my birthday is") ||
+    lowerText.includes("remember that my birthday is") ||
+    lowerText.includes("i was born on")
+){
+
+    let birthday = "";
+
+    if(lowerText.includes("my birthday is")){
+        birthday = text.substring(
+            text.toLowerCase().indexOf("my birthday is") + 14
+        ).trim();
+    }
+
+    else if(lowerText.includes("remember that my birthday is")){
+        birthday = text.substring(
+            text.toLowerCase().indexOf("remember that my birthday is") + 27
+        ).trim();
+    }
+
+    else if(lowerText.includes("i was born on")){
+        birthday = text.substring(
+            text.toLowerCase().indexOf("i was born on") + 13
+        ).trim();
+    }
+
+    if(birthday){
+
+        personalMemory.birthday = birthday;
+
+        localStorage.setItem(
+            "personalMemory",
+            JSON.stringify(personalMemory)
+        );
+
+        chat.innerHTML += `
+            <div class="ai-message">
+                I'll remember your birthday is ${birthday}. 🎂
+            </div>
+        `;
+
+        chat.scrollTop = chat.scrollHeight;
+
+        return;
+    }
+}
+    // NAME MEMORY
+
+if(
+    lowerText.includes("what is my name") ||
+    lowerText.includes("what's my name")
+){
+
+    const memories = getAllPersonalMemory();
+
+    let name =
+        memories.name ||
+        memories.userName ||
+        memories["name"] ||
+        localStorage.getItem("userName");
+
+    if(name){
+
+        chat.innerHTML += `
+            <div class="ai-message">
+                Your name is ${name}. 👋
+            </div>
+        `;
+
+        chat.scrollTop = chat.scrollHeight;
+
+        return;
+    }
+}
+    // HOBBY MEMORY
+
+if(
+    lowerText.includes("what is my hobby") ||
+    lowerText.includes("what's my hobby")
+){
+
+    const memories = getAllPersonalMemory();
+
+    let hobby =
+        memories.hobby ||
+        memories["hobby"];
+
+    if(hobby){
+
+        chat.innerHTML += `
+            <div class="ai-message">
+                Your hobby is ${hobby}. 🎯
+            </div>
+        `;
+
+        chat.scrollTop = chat.scrollHeight;
+
+        return;
+    }
+}
+    // BIRTHDAY MEMORY
+
+if(
+    lowerText.includes("when is my birthday") ||
+    lowerText.includes("what is my birthday") ||
+    lowerText.includes("do you remember my birthday") ||
+    lowerText.includes("what's my birthday")
+){
+
+    const memories = getAllPersonalMemory();
+
+    const birthday =
+        memories.birthday ||
+        memories["birthday"];
+
+    if(birthday){
+
+        chat.innerHTML += `
+            <div class="ai-message">
+                Your birthday is ${birthday}. 🎂🎉
+            </div>
+        `;
+
+    }else{
+
+        chat.innerHTML += `
+            <div class="ai-message">
+                I don't have your birthday saved yet. 🎂
+            </div>
+        `;
+
+    }
+
+    chat.scrollTop = chat.scrollHeight;
+
+    return;
+}
+    // Show typing message
+    chat.innerHTML += `
+        <div id="typing">
+    <p>
+        Louis AI is thinking
+        <span class="typing-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+        </span>
+    </p>
+</div>
+    `;
+
+    chat.scrollTop = chat.scrollHeight;
+
+    try{
+
+        // Ask the Vercel AI API first
+let reply = await getAIResponse(userText, getRecentConversation());
+
+// If the AI server fails, use Louis AI's local brain
+if (
+    !reply ||
+    reply.includes("trouble connecting") ||
+    reply.includes("couldn't connect") ||
+    reply.includes("didn't receive a response")
+) {
+    reply = getReply(userText);
+}
+        // Remove typing message
+        const typing = document.getElementById("typing");
+
+        if(typing){
+            typing.remove();
+        }
+
+        // Remember AI reply
+        lastAIMessage = reply;
+
+        const formattedReply = reply
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    .replace(/^### (.*?)$/gm, "<h3>$1</h3>")
+    .replace(/^- (.*?)$/gm, "• $1")
+    .replace(/^\d+\.\s+(.*?)$/gm, "$&")
+    .replace(/\n/g, "<br>");
+
+chat.innerHTML += `
+    <div class="ai-message">
+        ${formattedReply}
+
+        <br>
+
+        <button class="copy-ai-button" type="button">
+    📋 Copy
+</button>
+
+<button class="regenerate-ai-button" type="button">
+    🔄 Regenerate
+</button>
+
+<button class="feedback-button" type="button">
+    👍
+</button>
+
+<button class="feedback-button" type="button">
+    👎
+</button>
+    </div>
+`;
+if(window.MathJax){
+    MathJax.typesetPromise();
+}
+const copyButton = chat.lastElementChild.querySelector(".copy-ai-button");
+
+copyButton.addEventListener("click", async function(){
+
+    try{
+
+        await navigator.clipboard.writeText(reply);
+
+        copyButton.textContent = "✅ Copied";
+
+        setTimeout(function(){
+            copyButton.textContent = "📋 Copy";
+        }, 2000);
+
+    }catch(error){
+
+        copyButton.textContent = "❌ Copy failed";
+
+    }
+
+});
+    // 🔄 REGENERATE AI RESPONSE
+    const regenerateButton =
+        chat.lastElementChild.querySelector(".regenerate-ai-button");
+
+    regenerateButton.addEventListener("click", async function(){
+
+        regenerateButton.textContent = "⏳ Regenerating...";
+
+        try{
+
+            const newReply = await getAIResponse(
+                lastUserMessage,
+                getRecentConversation()
+            );
+
+            const formattedNewReply = newReply
+                .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+                .replace(/^### (.*?)$/gm, "<h3>$1</h3>")
+                .replace(/\n/g, "<br>");
+
+            const newAIMessage = document.createElement("div");
+
+            newAIMessage.className = "ai-message";
+
+            newAIMessage.innerHTML = `
+                ${formattedNewReply}
+
+                <br>
+
+                <button class="copy-ai-button" type="button">
+                    📋 Copy
+                </button>
+
+                <button class="regenerate-ai-button" type="button">
+                    🔄 Regenerate
+                </button>
+                <button class="feedback-button" type="button">
+    👍
+</button>
+
+<button class="feedback-button" type="button">
+    👎
+</button>
+            `;
+
+            chat.appendChild(newAIMessage);
+
+            chat.scrollTop = chat.scrollHeight;
+
+            regenerateButton.textContent = "🔄 Regenerate";
+
+        }catch(error){
+
+            console.error("Regenerate error:", error);
+
+            regenerateButton.textContent = "❌ Failed";
+
+            setTimeout(function(){
+                regenerateButton.textContent = "🔄 Regenerate";
+            }, 2000);
+
+        }
+
+    });
+            // 👍 / 👎 AI FEEDBACK
+    const feedbackButtons =
+        chat.lastElementChild.querySelectorAll(".feedback-button");
+
+    feedbackButtons.forEach(function(button){
+
+    button.addEventListener("click", function(){
+
+        // Remember which button was clicked BEFORE changing its text
+        const originalFeedback = button.textContent;
+
+        let feedbackType;
+
+        if(originalFeedback.includes("👍")){
+            feedbackType = "positive";
+        }else{
+            feedbackType = "negative";
+        }
+
+        // Change button appearance
+        if(feedbackType === "positive"){
+            button.textContent = "✅ Helpful";
+        }else{
+            button.textContent = "✅ Thanks";
+        }
+
+        // Save AI feedback
+        let aiFeedback =
+            JSON.parse(localStorage.getItem("aiFeedback")) || [];
+
+        aiFeedback.push({
+            type: feedbackType,
+            message: lastAIMessage,
+            time: new Date().toISOString()
+        });
+
+        localStorage.setItem(
+            "aiFeedback",
+            JSON.stringify(aiFeedback)
+        );
+
+        // Update feedback dashboard
+        updateFeedbackDashboard();
+
+        // Disable both feedback buttons
+        feedbackButtons.forEach(function(otherButton){
+            otherButton.disabled = true;
+        });
+
+    });
+
+});
+        chat.scrollTop = chat.scrollHeight;
+
+        chatMemory.push({
+            role: "assistant",
+            message: reply
+        });
+
+        if(chatMemory.length > 20){
+            chatMemory.shift();
+        }
+
+        localStorage.setItem(
+            "chatMemory",
+            JSON.stringify(chatMemory)
+        );
+
+        conversation.push({
+            sender: "ai",
+            message: reply
+        });
+
+        if(conversation.length > 20){
+            conversation.shift();
+        }
+
+        localStorage.setItem(
+            "conversation",
+            JSON.stringify(conversation)
+        );
+
+        // Speak the reply
+        if(typeof speechSynthesis !== "undefined"){
+            const speech = new SpeechSynthesisUtterance(reply);
+            speechSynthesis.speak(speech);
+        }
+
+    }catch(error){
+
+    const typing = document.getElementById("typing");
+
+    if(typing){
+        typing.remove();
+    }
+
+    console.error("Louis AI API error:", error);
+
+    // Use Louis AI's local brain if the API is unavailable
+    const localReply = getReply(userText);
+
+    lastAIMessage = localReply;
+
+    chat.innerHTML += `
+        <div class="ai-message">
+            ${localReply}
+        </div>
+    `;
+
+    chat.scrollTop = chat.scrollHeight;
+
+    // Save local reply to memory
+    chatMemory.push({
+        role: "assistant",
+        message: localReply
+    });
+
+    if(chatMemory.length > 20){
+        chatMemory.shift();
+    }
+
+    localStorage.setItem(
+        "chatMemory",
+        JSON.stringify(chatMemory)
+    );
+
+    conversation.push({
+        sender: "ai",
+        message: localReply
+    });
+
+    if(conversation.length > 20){
+        conversation.shift();
+    }
+
+    localStorage.setItem(
+        "conversation",
+        JSON.stringify(conversation)
+    );
+
+    // Speak the local reply
+    if(typeof speechSynthesis !== "undefined"){
+        const speech = new SpeechSynthesisUtterance(localReply);
+        speechSynthesis.speak(speech);
+    }
+    }
+
+    chat.scrollTop = chat.scrollHeight;
+}
+function handleGreeting(){
+
+    return randomResponse(personality.greetings);
+
+}
+function handleTime(){
+
+    return "The time is " + new Date().toLocaleTimeString();
+
+}
+function handleDate(){
+
+    return "Today's date is " + new Date().toLocaleDateString();
+
+}
+function handleThanks(){
+
+    return randomResponse(personality.thanks);
+
+}
+function handleGoodbye(){
+
+    return randomResponse(personality.goodbye);
+
+}
+function handleCalculator(text){
+
+    try{
+        let answer = Function("return " + text)();
+        return "The answer is " + answer;
+    }catch(error){
+        return "Sorry, I couldn't calculate that.";
+    }
+
+}
+function handleNotes(text, userText){
+
+    if(text.startsWith("note:")){
+
+        let note = userText.substring(5).trim();
+
+        if(note !== ""){
+            notes.push(note);
+            localStorage.setItem("notes", JSON.stringify(notes));
+            return "I've saved your note.";
+        }
+
+        return "Please type a note after 'Note:'.";
+    }
+
+    if(text.includes("show my notes")){
+
+        if(notes.length === 0){
+            return "You don't have any saved notes.";
+        }
+
+        return "Your notes:\n\n" + notes.join("\n");
+    }
+
+    if(text.includes("clear my notes")){
+
+        notes = [];
+        localStorage.removeItem("notes");
+
+        return "All your notes have been deleted.";
+    }
+
+    return null;
+
+}
+function handleTasks(text, userText){
+
+    if(text.startsWith("task:")){
+
+        let task = userText.substring(5).trim();
+
+        if(task !== ""){
+            tasks.push(task);
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+            return "Task added successfully.";
+        }
+
+        return "Please type a task after 'Task:'.";
+    }
+
+    if(text.includes("show my tasks")){
+
+        if(tasks.length === 0){
+            return "You don't have any tasks.";
+        }
+
+        let list = "Your tasks:\n\n";
+
+        for(let i = 0; i < tasks.length; i++){
+            list += (i + 1) + ". " + tasks[i] + "\n";
+        }
+
+        return list;
+    }
+
+    if(text.startsWith("complete task ")){
+
+        let number = parseInt(text.replace("complete task ", ""));
+
+        if(number >= 1 && number <= tasks.length){
+            let completed = tasks.splice(number - 1, 1);
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+            return "Completed: " + completed[0];
+        }
+
+        return "Task not found.";
+    }
+
+    return null;
+}
+function handleMemory(text, userText){
+
+    if(text.startsWith("my name is ")){
+        let name = userText.substring(11);
+        localStorage.setItem("userName", name);
+        return "Nice to meet you, " + name + "!";
+    }
+
+    if(text.includes("what is my name")){
+        let name = localStorage.getItem("userName");
+
+        if(name){
+            return "Your name is " + name + ".";
+        }
+
+        return "I don't know your name yet.";
+    }
+
+    return null;
+}
+// 🧠 CONVERSATION CONTEXT MEMORY
+function getConversationContext(){
+
+    if(!Array.isArray(chatMemory) || chatMemory.length === 0){
+        return "";
+    }
+
+    let context = "";
+
+    chatMemory.slice(-10).forEach(function(item){
+
+        if(typeof item === "string"){
+            context += item + "\n";
+        }
+
+        else if(item && item.message){
+            context += item.message + "\n";
+        }
+
+        else if(item && item.text){
+            context += item.text + "\n";
+        }
+
+    });
+
+    return context.trim();
+}
+function handleContextReference(text){
+
+    const lowerText = text.toLowerCase().trim();
+
+    if(!lastTopic){
+        return null;
+    }
+
+    const hasReference =
+        lowerText.includes(" it ") ||
+        lowerText.endsWith(" it") ||
+        lowerText.startsWith("it ") ||
+        lowerText.includes(" that ") ||
+        lowerText.endsWith(" that") ||
+        lowerText.startsWith("that ") ||
+        lowerText.includes(" this ") ||
+        lowerText.endsWith(" this") ||
+        lowerText.startsWith("this ");
+
+    if(!hasReference){
+        return null;
+    }
+
+    if(
+        lowerText.includes("tell me more") ||
+        lowerText.includes("more about")
+    ){
+        return "Sure! We were talking about " + lastTopic + ". What would you like to know about it?";
+    }
+
+    if(
+        lowerText.includes("how can i improve") ||
+        lowerText.includes("how do i improve") ||
+        lowerText.includes("how can i make it better")
+    ){
+        return "We are talking about " + lastTopic + ". You can improve it by adding useful features, better responses, reliable memory, and a better user experience.";
+    }
+
+    if(
+        lowerText.includes("help me with") ||
+        lowerText.includes("help with")
+    ){
+        return "Of course! I understand that you mean " + lastTopic + ". Tell me what part you want help with.";
+    }
+
+    return "I understand that you are referring to " + lastTopic + ".";
+}
+// 🧠 NATURAL FOLLOW-UP CONVERSATION
+function getNaturalFollowUp(text){
+
+    // Favourite colour
+    if(
+        text.includes("what about my favourite colour") ||
+        text.includes("what about my favorite color") ||
+        text.includes("and my favourite colour") ||
+        text.includes("and my favorite color")
+    ){
+
+        const memories = getAllPersonalMemory();
+
+        if(memories.favoriteColor){
+            return "Your favourite colour is " + memories.favoriteColor + ".";
+        }
+
+        return "I don't have your favourite colour saved yet.";
+    }
+
+
+    // Favourite food
+    if(
+        text.includes("what about my favourite food") ||
+        text.includes("what about my favorite food") ||
+        text.includes("and my favourite food") ||
+        text.includes("and my favorite food")
+    ){
+
+        const memories = getAllPersonalMemory();
+
+        if(memories.favoriteFood){
+            return "Your favourite food is " + memories.favoriteFood + ".";
+        }
+
+        if(memories.favouriteFood){
+            return "Your favourite food is " + memories.favouriteFood + ".";
+        }
+
+        return "I don't have your favourite food saved yet.";
+    }
+
+
+    // Name
+    if(
+        text.includes("what about my name") ||
+        text.includes("and my name")
+    ){
+
+        const memories = getAllPersonalMemory();
+
+        if(memories.name){
+            return "Your name is " + memories.name + ".";
+        }
+
+        return "I don't have your name saved yet.";
+    }
+
+
+    // Hobby
+    if(
+        text.includes("what about my hobby") ||
+        text.includes("and my hobby")
+    ){
+
+        const memories = getAllPersonalMemory();
+
+        if(memories.hobby){
+            return "Your hobby is " + memories.hobby + ".";
+        }
+
+        return "I don't have your hobby saved yet.";
+    }
+
+
+    // Birthday
+    if(
+        text.includes("what about my birthday") ||
+        text.includes("and my birthday")
+    ){
+
+        const memories = getAllPersonalMemory();
+
+        if(memories.birthday){
+            return "Your birthday is " + memories.birthday + ".";
+        }
+
+        return "I don't have your birthday saved yet.";
+    }
+
+
+    // Favourite football team
+    if(
+        text.includes("what about my favourite football team") ||
+        text.includes("what about my favorite football team") ||
+        text.includes("and my favourite football team") ||
+        text.includes("and my favorite football team")
+    ){
+
+        const memories = getAllPersonalMemory();
+
+        if(memories.favoriteFootballTeam){
+            return "Your favourite football team is " +
+                   memories.favoriteFootballTeam + ".";
+        }
+
+        if(memories.favouriteFootballTeam){
+            return "Your favourite football team is " +
+                   memories.favouriteFootballTeam + ".";
+        }
+
+        return "I don't have your favourite football team saved yet.";
+    }
+
+
+    return null;
+}
+// 🧠 SMART TOPIC FOLLOW-UP
+function getTopicFollowUp(text){
+
+    if(!lastTopic){
+        return null;
+    }
+
+    const followUpPhrases = [
+        "tell me more",
+        "tell me more about it",
+        "explain that",
+        "explain more",
+        "continue",
+        "go on",
+        "what else",
+        "what else do you know",
+        "can you explain",
+        "explain it",
+        "how does it work",
+        "how does that work",
+        "why is that",
+        "why is it",
+        "what do you mean",
+        "say more"
+    ];
+
+    let isFollowUp = false;
+
+    for(let phrase of followUpPhrases){
+
+        if(text.includes(phrase)){
+            isFollowUp = true;
+            break;
+        }
+    }
+
+    if(!isFollowUp){
+        return null;
+    }
+
+    // 🔎 Look for the previous topic inside Louis AI's knowledge
+    for(let category in knowledge){
+
+        if(!knowledge[category]){
+            continue;
+        }
+
+        for(let key in knowledge[category]){
+
+            const topicKey = key.toLowerCase();
+            const topic = lastTopic.toLowerCase();
+
+            if(
+                topic.includes(topicKey) ||
+                topicKey.includes(topic)
+            ){
+
+                return knowledge[category][key];
+            }
+        }
+    }
+
+    // 🧠 If no stored answer is found,
+    // keep the previous topic in the conversation
+    return "Sure. We were talking about " +
+           lastTopic +
+           ". Tell me what part of it you would like me to explain further.";
+}
+function getReply(userText){
+
+    let text = userText.toLowerCase();
+    // 🧠 Use recent conversation context
+const conversationContext = getConversationContext();
+
+const contextReply = handleContextReference(text);
+
+if(contextReply){
+    return contextReply;
+}
+
+lastQuestion = text;
+    let intent = detectIntent(text);
+    // 🧠 CHECK NATURAL FOLLOW-UP QUESTIONS
+const naturalFollowUp = getNaturalFollowUp(text);
+
+if(naturalFollowUp){
+    return naturalFollowUp;
+}
+    // 🧠 CHECK PREVIOUS TOPIC
+const topicFollowUp = getTopicFollowUp(text);
+
+if(topicFollowUp){
+    return topicFollowUp;
+}
+    if(text.startsWith("rename category:")){
+
+    let command = userText.substring(16).trim();
+
+    if(command.includes("=")){
+
+        let parts = command.split("=");
+
+        let oldName = parts[0].trim().toLowerCase();
+        let newName = parts[1].trim().toLowerCase();
+
+        if(knowledge[oldName]){
+
+            knowledge[newName] = knowledge[oldName];
+            delete knowledge[oldName];
+
+            localStorage.setItem("knowledge", JSON.stringify(knowledge));
+
+            return "Category renamed from " + oldName + " to " + newName + ".";
+        }
+
+        return "I couldn't find the category " + oldName + ".";
+    }
+
+    return "Use this format: Rename category: old = new";
+}
+    if(text.startsWith("delete category:")){
+
+    let category = userText.substring(16).trim().toLowerCase();
+
+    if(knowledge[category]){
+        delete knowledge[category];
+
+        localStorage.setItem("knowledge", JSON.stringify(knowledge));
+
+        return "The " + category + " category has been deleted.";
+    }
+
+    return "I couldn't find that category.";
+}
+    if(
+    text.includes("what categories do you know") ||
+    text.includes("list categories") ||
+    text.includes("show categories")
+){
+
+    let categories = Object.keys(knowledge);
+
+    if(categories.length === 0){
+        return "I don't know any categories yet.";
+    }
+
+    return "I currently know these categories:\n\n" +
+           categories.join("\n");
+}
+    if(text.startsWith("learn")){
+
+    let lines = userText.split("\n");
+
+    if(lines.length >= 4){
+
+        let question = lines[1].replace("Question:", "").trim().toLowerCase();
+        let answer = lines[2].replace("Answer:", "").trim();
+        let category = lines[3].replace("Category:", "").trim().toLowerCase();
+
+        learnedQuestions[question] = {
+            answer: answer,
+            category: category
+        };
+
+        localStorage.setItem(
+            "learnedQuestions",
+            JSON.stringify(learnedQuestions)
+        );
+
+        return "I have learned a new question in the " + category + " category.";
+    }
+}
+if (
+    text.includes("what topics do you know") ||
+    text.includes("list topics") ||
+    text.includes("show topics")
+) {
+
+    let result = "";
+
+    for (let category in knowledge) {
+
+        result += "\n\n" + category.toUpperCase() + ":\n";
+
+        for (let topic in knowledge[category]) {
+            result += "• " + topic + "\n";
+        }
+    }
+
+    return result || "I don't know any topics yet.";
+}
+    if (
+    text.includes("what topics do you know") ||
+    text.includes("list topics") ||
+    text.includes("show topics")
+) {
+
+    let topics = Object.keys(knowledge);
+
+    if (topics.length === 0) {
+        return "I don't know any topics yet. Teach me by typing: Learn: topic = answer";
+    }
+
+    return "I currently know these topics: " + topics.join(", ");
+}
+    if (
+    text.includes("how many topics do you know") ||
+    text.includes("how many topics")
+) {
+    return "Right now I know " + Object.keys(knowledge).length + " topics. You can teach me more by typing: Learn: topic = answer";
+}
+    for(let word in synonyms){
+    text = text.replaceAll(word, synonyms[word]);
+}
+
+if(text.includes("javascript")) rememberTopic("javascript");
+if(text.includes("html")) rememberTopic("html");
+if(text.includes("css")) rememberTopic("css");
+if(text.includes("ai")) rememberTopic("ai");
+    if(text.includes("what did we just talk about")){
+
+    if(chatMemory.length >= 2){
+
+        let previous = chatMemory[chatMemory.length - 2];
+
+        return "We were talking about: " + previous.message;
+    }
+
+    return "We haven't talked much yet.";
+}
+    if(text.includes("javascript")) lastTopic = "javascript";
+if(text.includes("html")) lastTopic = "html";
+if(text.includes("css")) lastTopic = "css";
+if(text.includes("louis ai")) lastTopic = "louis ai";
+if(text.includes("ai")) lastTopic = "ai";
+
+if(intent === "greeting"){
+    return handleGreeting();
+}
+let tasksReply = handleTasks(text, userText);
+
+if(tasksReply){
+    return tasksReply;
+}
+let notesReply = handleNotes(text, userText);
+
+if(notesReply){
+    return notesReply;
+}
+if(text === "what is your name"){
+        return "My name is Louis AI.";
+    }
+
+    if(text.includes("how are you")){
+        return "I'm doing great!";
+    }
+
+if(intent === "time"){
+    return handleTime();
+}
+
+if(intent === "date"){
+    return handleDate();
+}
+
+let memoryReply = handleMemory(text, userText);
+
+if(memoryReply){
+    return memoryReply;
+}
+
+    if(text.startsWith("my favourite color is ")){
+        let color = userText.substring(22);
+        localStorage.setItem("favoriteColor", color);
+        return "I'll remember your favourite color is " + color + ".";
+    }
+
+    if(text.includes("what is my favourite color")){
+        let color = localStorage.getItem("favoriteColor");
+        if(color){
+            return "Your favourite color is " + color + ".";
+        }else{
+            return "You haven't told me your favourite color yet.";
+        }
+    }
+
+    if(text.startsWith("my favourite food is ")){
+        let food = userText.substring(21);
+        localStorage.setItem("favoriteFood", food);
+        return "Great! I'll remember that your favourite food is " + food + ".";
+    }
+
+    if(text.startsWith("my birthday is ")){
+        let birthday = userText.substring(15);
+        localStorage.setItem("birthday", birthday);
+        return "Great! I'll remember your birthday is " + birthday + ".";
+    }
+
+    if(text.includes("when is my birthday")){
+        let birthday = localStorage.getItem("birthday");
+        if(birthday){
+            return "Your birthday is " + birthday + ".";
+        }else{
+            return "You haven't told me your birthday yet.";
+        }
+    }
+
+    if(text.startsWith("my hobby is ")){
+        let hobby = userText.substring(12);
+        localStorage.setItem("hobby", hobby);
+        return "Great! I'll remember that your hobby is " + hobby + ".";
+    }
+
+if(text.includes("what is my hobby")){
+    let hobby = localStorage.getItem("hobby");
+    if(hobby){
+        return "Your hobby is " + hobby + ".";
+        
+    }else{
+        return "You haven't told me your hobby yet.";
+    }
+}
+if(text.includes("who are you")){
+    return "I am Louis AI, your personal AI assistant created by Louis.";
+}
+
+if(text.includes("what can you do")){
+    return "I can chat with you, remember your name, tell the date and time, and answer simple questions.";
+}
+
+if(intent === "thanks"){
+    return handleThanks();
+}
+
+if(text.includes("good morning")){
+    return "Good morning! I hope you have a wonderful day.";
+}
+
+if(text.includes("good night")){
+    return "Good night! Sleep well and see you tomorrow.";
+}
+
+if(text.includes("how old are you")){
+    return "I'm a digital AI, so I don't have an age like humans.";
+}
+
+if(
+    text.includes("who created you") ||
+    text.includes("who made you")
+){
+    return "I was created by Louis with help from ChatGPT.";
+}
+
+if(intent === "goodbye"){
+    return handleGoodbye();
+}
+
+if(text.includes("what did i just say")){
+    return "You just said: " + lastUserMessage;
+}
+
+if(text.includes("what did you just say")){
+    return "I just said: " + lastAIMessage;
+}
+
+if (text.startsWith("learn ")) {
+
+    let lesson = userText.substring(6).trim();
+
+    if (!lesson.includes("=")) {
+        return "Use this format: learn category: question = answer";
+    }
+
+    let parts = lesson.split("=");
+
+    let left = parts[0].trim();
+    let answer = parts[1].trim();
+
+    if (!left.includes(":")) {
+        return "Example: learn science: earth = Earth is the third planet from the Sun.";
+    }
+
+    let info = left.split(":");
+
+    let category = info[0].trim().toLowerCase();
+    let question = info[1].trim().toLowerCase();
+
+    if (!knowledge[category]) {
+        knowledge[category] = {};
+    }
+
+    knowledge[category][question] = answer;
+
+    localStorage.setItem("knowledge", JSON.stringify(knowledge));
+
+    return "I have learned a new " + category + " fact!";
+}
+
+if(text.startsWith("forget:")){
+
+    let question = userText.substring(7).trim().toLowerCase();
+
+    if(learnedFacts[question]){
+
+        delete learnedFacts[question];
+        localStorage.setItem("learnedFacts", JSON.stringify(learnedFacts));
+
+        return "I've forgotten that.";
+    }
+
+    return "I don't know that yet.";
+}
+if(text.startsWith("i live in ")){
+
+    let city = userText.substring(10);
+    localStorage.setItem("userCity", city);
+
+    return "I'll remember that you live in " + city + ".";
+}
+
+if(text.includes("where do i live")){
+
+    let city = localStorage.getItem("userCity");
+
+    if(city){
+        return "You live in " + city + ".";
+    }else{
+        return "You haven't told me where you live yet.";
+    }
+}
+    if(text.startsWith("my favourite football team is")){
+
+let team = userText.substring(29).trim();
+
+    localStorage.setItem(
+        "favoriteFootballTeam",
+        team
+    );
+
+    return "I'll remember that your favourite football team is " + team + ".";
+    }
+    if(text.includes("what is my favourite football team")){
+
+    let team = localStorage.getItem(
+        "favoriteFootballTeam"
+    );
+
+    if(team){
+        return "Your favourite football team is " + team + ".";
+    }else{
+        return "You haven't told me your favourite football team yet.";
+    }
+    }
+if(text.startsWith("my favourite animal is ")){
+
+    let animal = userText.substring(24);
+    localStorage.setItem("favoriteAnimal", animal);
+
+    return "I'll remember that your favourite animal is " + animal + ".";
+}
+
+if(text.includes("what is my favourite animal")){
+
+    let animal = localStorage.getItem("favoriteAnimal");
+
+    if(animal){
+        return "Your favourite animal is " + animal + ".";
+    }else{
+        return "You haven't told me your favourite animal yet.";
+    }
+}
+for(let key in learnedFacts){
+
+    if(text.includes(key)){
+        return learnedFacts[key];
+    }
+
+}
+if(text.startsWith("did we talk about ")){
+
+    let topic = text.replace("did we talk about ", "").trim();
+
+    for(let item of conversation){
+
+        if(item.toLowerCase().includes(topic)){
+            return "Yes. I found this:\n\n" + item;
+        }
+
+    }
+
+    return "No, I couldn't find anything about " + topic + ".";
+}
+if(text.startsWith("what did i say about ")){
+
+let topic = text
+    .replace("what did i say about ", "")
+    .replace("?", "")
+    .trim();
+
+    for(let i = conversation.length - 1; i >= 0; i--){
+
+        if(
+            conversation[i].startsWith("You:") &&
+            conversation[i].toLowerCase().includes(topic)
+        ){
+            return "You said:\n\n" + conversation[i];
+        }
+
+    }
+
+    return "I couldn't find anything you said about " + topic + ".";
+}
+if(text.includes("who created it")){
+
+    if(lastTopic === "javascript"){
+        return "JavaScript was created by Brendan Eich in 1995.";
+    }
+
+    if(lastTopic === "html"){
+        return "HTML was created by Tim Berners-Lee.";
+    }
+
+    if(lastTopic === "css"){
+        return "CSS was developed by Håkon Wium Lie.";
+    }
+
+    if(lastTopic === "ai"){
+        return "Artificial Intelligence has many pioneers, including Alan Turing, John McCarthy, Marvin Minsky, and others.";
+    }
+
+    return "What topic are you referring to?";
+}
+let bestAnswer = "";
+let highestScore = 0;
+if(text === "when?" || text === "when"){
+
+    if(lastTopic === "javascript"){
+        return "JavaScript was created in 1995.";
+    }
+
+    if(lastTopic === "html"){
+        return "HTML was introduced in 1991.";
+    }
+
+    if(lastTopic === "css"){
+        return "CSS was first proposed in 1994.";
+    }
+
+    return "Could you tell me what you're referring to?";
+}
+for (let category in knowledge) {
+
+    for (let key in knowledge[category]) {
+
+let words = key.toLowerCase().replace(/[^\w\s]/g, "").split(" ");
+
+let synonyms = {
+    created: ["made", "built", "developed"],
+    who: ["whom"],
+    ai: ["assistant", "bot"],
+    capital: ["city"],
+    earth: ["world", "planet"]
+};
+
+let expandedWords = [];
+
+for(let word of words){
+    expandedWords.push(word);
+
+    if(synonyms[word]){
+        expandedWords.push(...synonyms[word]);
+    }
+}
+
+words = expandedWords;
+        let score = 0;
+
+        for (let word of words) {
+            if (text.includes(word)) {
+                score++;
+            }
+        }
+
+        if (score > highestScore) {
+            highestScore = score;
+            bestAnswer = knowledge[category][key];
+        }
+    }
+}
+
+if (highestScore > 0) {
+    return bestAnswer;
+}
+
+if(text.startsWith("did we talk about ")){
+
+    let topic = text.replace("did we talk about ", "").trim();
+
+    for(let i = conversation.length - 2; i >= 0; i--){
+
+        if(conversation[i].toLowerCase().includes(topic)){
+            return "Yes. I found this:\n\n" + conversation[i];
+        }
+
+    }
+
+    return "No, I couldn't find anything about " + topic + ".";
+}
+if(text.startsWith("search ")){
+
+    let keyword = text.substring(7).trim();
+
+    let results = [];
+
+    for(let category in knowledge){
+
+        for(let question in knowledge[category]){
+
+            let answer = knowledge[category][question];
+
+            if(
+                question.includes(keyword) ||
+                answer.toLowerCase().includes(keyword)
+            ){
+                results.push("[" + category + "] " + question + " → " + answer);
+            }
+        }
+    }
+
+    if(results.length > 0){
+        return results.join("\n\n");
+    }else{
+        return "I couldn't find anything about '" + keyword + "'.";
+    }
+}
+// Simple Calculator
+if(
+    text.includes("+") ||
+    text.includes("-") ||
+    text.includes("*") ||
+    text.includes("/")
+){
+    return handleCalculator(text);
+}
+if(text.includes("show conversation") || text.includes("conversation history")){
+    return conversation.join("\n");
+}
+
+if(text.includes("help") || text.includes("commands")){
+
+    return `I can:
+- Chat with you
+- Remember your name
+- Remember your favourite colour
+- Remember your favourite food
+- Remember your birthday
+- Remember your hobby
+- Tell the date and time
+- Solve simple maths
+- Learn new facts
+- Forget learned facts
+- Show conversation history
+- Speak my replies
+- Listen to your voice`;
+
+}
+    // 🧠 FOLLOW-UP QUESTION UNDERSTANDING
+
+if(
+    text === "what am i building" ||
+    text === "what are we building" ||
+    text === "what is my project" ||
+    text === "what project am i working on"
+){
+
+    if(lastTopic){
+        return "You are building " + lastTopic + ". 🧠";
+    }
+
+    return "I remember that you are working on a project, but I don't know the current project name yet.";
+}
+if(text.includes("what were we talking about") ||
+   text.includes("what is the topic")){
+
+    if(lastTopic){
+        return "We were talking about " + lastTopic + ".";
+    }else{
+        return "We haven't started a specific topic yet.";
+    }
+}
+if(text.startsWith("why ")){
+
+    let question = text.substring(4).trim();
+
+    for(let category in knowledge){
+
+        for(let key in knowledge[category]){
+
+            if(question.includes(key) || key.includes(question)){
+                return knowledge[category][key] + " That's why.";
+            }
+
+        }
+
+    }
+
+    return "I don't know why yet. You can teach me.";
+}
+if(text.includes("summarize our conversation") || text.includes("conversation summary")){
+
+    if(conversation.length === 0){
+        return "We haven't talked yet.";
+    }
+
+    let summary = "Here's a summary of our conversation:\n\n";
+
+    let start = Math.max(0, conversation.length - 10);
+
+    for(let i = start; i < conversation.length; i++){
+        summary += conversation[i] + "\n";
+    }
+
+    return summary;
+}
+if(
+    text.includes("what were we talking about") ||
+    text.includes("what is our current topic")
+){
+
+    if(topicHistory.length === 0){
+        return "We haven't discussed any topic yet.";
+    }
+
+    return "We were talking about " + topicHistory[topicHistory.length - 1] + ".";
+}
+if(text.startsWith("show ")){
+
+    let category = text.replace("show ", "").replace(" topics","").trim();
+
+    if(knowledge[category]){
+
+        let keys = Object.keys(knowledge[category]);
+
+        if(keys.length === 0){
+            return "There are no topics in " + category + ".";
+        }
+
+        return "Topics in " + category + ":\n\n" + keys.join("\n");
+    }
+
+    return "I don't have a category called " + category + ".";
+}
+if(
+    text.includes("how many topics do you know") ||
+    text.includes("how much do you know")
+){
+
+    let total = 0;
+
+    for(let category in knowledge){
+        total += Object.keys(knowledge[category]).length;
+    }
+
+    return "I currently know " + total + " topics in " +
+           Object.keys(knowledge).length +
+           " categories.";
+}
+    // NATURAL FOOTBALL TEAM MEMORY
+if(
+    text.startsWith("i support ") ||
+    text.startsWith("i love ") ||
+    text.startsWith("my team is ") ||
+    text.includes("i'm a ") && text.includes(" fan") ||
+    text.includes("i am a ") && text.includes(" fan")
+){
+
+    let team = "";
+
+    if(text.startsWith("i support ")){
+        team = userText.substring(10).trim();
+    }
+
+    else if(text.startsWith("i love ")){
+        team = userText.substring(7).trim();
+    }
+
+    else if(text.startsWith("my team is ")){
+        team = userText.substring(11).trim();
+    }
+
+    else if(text.includes("i'm a ") && text.includes(" fan")){
+        team = userText.substring(7, text.indexOf(" fan")).trim();
+    }
+
+    else if(text.includes("i am a ") && text.includes(" fan")){
+        team = userText.substring(7, text.indexOf(" fan")).trim();
+    }
+
+    if(team){
+        localStorage.setItem("favoriteFootballTeam", team);
+
+        return "I'll remember that you support " + team + ".";
+    }
+}
+    // NATURAL FOOTBALL TEAM MEMORY QUESTIONS
+
+if(
+    text.includes("what football team do i support") ||
+    text.includes("which football team do i support") ||
+    text.includes("what team do i support") ||
+    text.includes("which team do i support") ||
+    text.includes("what team do i love") ||
+    text.includes("which team do i love")
+){
+
+    let team = localStorage.getItem("favoriteFootballTeam");
+
+    if(team){
+        return "You support " + team + ".";
+    }else{
+        return "You haven't told me which football team you support yet.";
+    }
+            }
+let randomReplies = [
+    "I'm not sure about that yet. You can teach me by typing: Learn: question = answer",
+    "I don't know the answer yet, but I'm learning every day.",
+    "That's interesting. I hope you'll teach me the answer.",
+    "I'm still growing smarter. Try teaching me something new!"
+];
+
+return randomReplies[Math.floor(Math.random() * randomReplies.length)];
+}
+window.onload = async function(){
+
+    await loadKnowledge();
+
+    let chat = document.getElementById("chat");
+
+    conversation.forEach(function(message){
+
+        if(message.startsWith("You: ")){
+            chat.innerHTML += "<div class='user-message'>" + message.replace("You: ", "") + "</div>";
+        }else{
+            chat.innerHTML += "<div class='ai-message'>" + message.replace("Louis AI: ", "") + "</div>";
+        }
+
+    });
+
+    chat.scrollTop = chat.scrollHeight;
+};
+if(localStorage.getItem("darkMode") === "true"){
+    document.body.classList.add("dark");
+}
+function clearChat(){
+
+    localStorage.removeItem("conversation");
+    conversation = [];
+
+    document.getElementById("chat").innerHTML = "";
+
+}
+function toggleDarkMode(){
+
+    document.body.classList.toggle("dark");
+
+    localStorage.setItem(
+        "darkMode",
+        document.body.classList.contains("dark")
+    );
+
+}
+function startListening(){
+
+    const SpeechRecognition =
+        window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if(!SpeechRecognition){
+        alert("Speech recognition is not supported on this browser.");
+        return;
+    }
+
+    const recognition = new SpeechRecognition();
+
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = function(){
+        alert("Listening... Speak now.");
+    };
+
+    recognition.onresult = function(event){
+        document.getElementById("userInput").value =
+            event.results[0][0].transcript;
+
+        sendMessage();
+    };
+
+    recognition.onerror = function(event){
+        alert("Speech recognition error: " + event.error);
+    };
+
+    recognition.start();
+}
+// 📊 UPDATE AI FEEDBACK DASHBOARD
+function updateFeedbackDashboard(){
+
+    let aiFeedback =
+        JSON.parse(localStorage.getItem("aiFeedback")) || [];
+
+    let positive = aiFeedback.filter(function(item){
+        return item.type === "positive";
+    }).length;
+
+    let negative = aiFeedback.filter(function(item){
+        return item.type === "negative";
+    }).length;
+
+    let total = aiFeedback.length;
+    let feedbackEntries = aiFeedback.length;
+    document.getElementById("feedbackEntries").textContent = feedbackEntries;
+let positiveRate = total === 0
+    ? 0
+    : Math.round((positive / total) * 100);
+    document.getElementById("positiveFeedback").textContent = positive;
+
+    document.getElementById("negativeFeedback").textContent = negative;
+
+    document.getElementById("totalFeedback").textContent = total;
+    document.getElementById("positiveRate").textContent =
+    positiveRate + "%";
+        // 📝 SHOW RECENT FEEDBACK
+
+    const recentFeedback =
+        document.getElementById("recentFeedback");
+
+    if(recentFeedback){
+
+        if(aiFeedback.length === 0){
+
+            recentFeedback.innerHTML =
+                "No feedback yet.";
+
+        }else{
+
+            const recent = aiFeedback
+                .slice(-5)
+                .reverse();
+
+            recentFeedback.innerHTML = "";
+
+            recent.forEach(function(item){
+
+                const feedbackItem =
+                    document.createElement("div");
+
+                feedbackItem.style.marginBottom = "12px";
+
+                const icon =
+                    item.type === "positive"
+                    ? "👍"
+                    : "👎";
+
+                const formattedFeedback = item.message
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    .replace(/^### (.*?)$/gm, "<h3>$1</h3>")
+    .replace(/^- (.*?)$/gm, "• $1")
+    .replace(/\n/g, "<br>");
+
+feedbackItem.innerHTML =
+    icon + " " + formattedFeedback;
+
+                recentFeedback.appendChild(
+                    feedbackItem
+                );
+
+            });
+
+        }
+
+    }
+}
+
+updateFeedbackDashboard();
