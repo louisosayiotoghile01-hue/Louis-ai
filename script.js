@@ -12,27 +12,6 @@ let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
 let chatMemory = JSON.parse(localStorage.getItem("chatMemory")) || [];
 let personalMemory =
     JSON.parse(localStorage.getItem("personalMemory")) || {};
-
-// Restore recent conversation context after a page refresh.
-// Supports both older {role, message} and newer {user, ai, topic} entries.
-if(Array.isArray(chatMemory) && chatMemory.length){
-    for(let i = chatMemory.length - 1; i >= 0; i--){
-        const item = chatMemory[i];
-        if(!item || typeof item !== "object") continue;
-        if(!lastAIMessage && (item.ai || (item.role === "assistant" && item.message))) lastAIMessage = String(item.ai || item.message);
-        if(!lastUserMessage && (item.user || (item.role === "user" && item.message))) lastUserMessage = String(item.user || item.message);
-        if(!lastTopic && item.topic) lastTopic = String(item.topic);
-        if(lastUserMessage && lastAIMessage && lastTopic) break;
-    }
-}
-try {
-    lastTopic = lastTopic || localStorage.getItem("lastTopic") || "";
-    const savedTopics = JSON.parse(localStorage.getItem("topicHistory") || "[]");
-    if(Array.isArray(savedTopics)) topicHistory = savedTopics.slice(-10);
-    if(!lastTopic && topicHistory.length) lastTopic = topicHistory[topicHistory.length - 1];
-} catch(error) {
-    console.warn("Louis AI could not restore topic memory:", error);
-}
 function savePersonalMemory(key, value){
 
     personalMemory[key] = value;
@@ -113,7 +92,6 @@ function saveLongTermMemory(memory){
         "longTermMemory",
         JSON.stringify(memories)
     );
-    longTermMemory = memories;
 
     return "I'll remember that. 🧠";
 }
@@ -248,21 +226,22 @@ function rememberTopic(topic){
     if(topicHistory.length > 10){
         topicHistory.shift();
     }
-
-    localStorage.setItem("lastTopic", lastTopic);
-    localStorage.setItem("topicHistory", JSON.stringify(topicHistory));
 }
 
 function getRecentConversation(){
-    return chatMemory.slice(-10).map(function(item){
-        if(typeof item === "string") return {user:item, ai:"", topic:""};
-        item = item || {};
-        return {
-            user: item.user || (item.role === "user" ? item.message : "") || "",
-            ai: item.ai || (item.role === "assistant" ? item.message : "") || "",
-            topic: item.topic || ""
-        };
-    });
+
+    return chatMemory
+        .slice(-10)
+        .map(function(item){
+
+            return {
+                user: item.user,
+                ai: item.ai,
+                topic: item.topic
+            };
+
+        });
+
 }
 
 function getFollowUpContext(){
@@ -582,54 +561,32 @@ cleanDuplicateLongTermMemories();
 function showLongTermMemory(){
 
     const memories = getLongTermMemory();
-    const personal = getAllPersonalMemory();
-    const personalLabels = {
-        name: "Name",
-        favoriteColor: "Favourite colour",
-        favoriteFood: "Favourite food",
-        birthday: "Birthday",
-        hobby: "Hobby",
-        location: "Location",
-        favoriteAnimal: "Favourite animal",
-        favoriteFootballTeam: "Favourite football team"
-    };
-    const categoryPatterns = {
-        name: /user'?s name|my name/i,
-        favoriteColor: /favo[u]?rite colo[u]?r/i,
-        favoriteFood: /favo[u]?rite food/i,
-        birthday: /birthday/i,
-        hobby: /hobby/i,
-        location: /location|lives in|user city/i,
-        favoriteAnimal: /favo[u]?rite animal/i,
-        favoriteFootballTeam: /favo[u]?rite football team/i
-    };
 
-    let lines = [];
-    if(Array.isArray(memories)){
-        memories.forEach(function(memory){
-            const value = typeof memory === "string"
-                ? memory
-                : String(memory && (memory.value || memory.text || memory.memory || "") || "");
-            if(!value) return;
-
-            // The structured personal memory is authoritative for these fields.
-            const replacedByPersonal = Object.keys(categoryPatterns).some(function(key){
-                return personal[key] && categoryPatterns[key].test(value);
-            });
-            if(!replacedByPersonal) lines.push(value);
-        });
+    if(!Array.isArray(memories) || memories.length === 0){
+        return "I don't have any long-term memories saved about you yet.";
     }
 
-    Object.keys(personalLabels).forEach(function(key){
-        if(personal[key]) lines.push(personalLabels[key] + ": " + personal[key]);
+    let reply = "Here is what I remember about you:\n\n";
+
+    memories.forEach((memory, index) => {
+
+        if(typeof memory === "string"){
+            reply += `${index + 1}. ${memory}\n`;
+            return;
+        }
+
+        if(memory && typeof memory === "object"){
+
+            const key = memory.key || memory.type || memory.category || "Memory";
+            const value = memory.value || memory.text || memory.memory || "";
+
+            if(value){
+                reply += `${index + 1}. ${key}: ${value}\n`;
+            }
+        }
     });
 
-    if(lines.length === 0){
-        return "I don't have any personal or long-term memories saved about you yet.";
-    }
-
-    return "Here is what I remember about you:\n\n" +
-        lines.map(function(value, index){ return (index + 1) + ". " + value; }).join("\n");
+    return reply.trim();
 }
 
 
@@ -795,14 +752,7 @@ chat.appendChild(userMemoryDiv);
 }
 
 
-if(
-    lowerText.startsWith("forget ") &&
-    !lowerText.startsWith("forget my ") &&
-    !lowerText.startsWith("forget memory ") &&
-    !lowerText.startsWith("forget all ") &&
-    lowerText !== "forget everything" &&
-    lowerText !== "forget everything i told you"
-){
+if(lowerText.startsWith("forget ")){
 
     const memoryToForget =
         userText.substring(7).trim();
@@ -938,15 +888,26 @@ if(
 ){
 
     const memoryKeys = [
-        "userName", "name", "favoriteColor", "favouriteColor",
-        "favoriteFood", "favouriteFood", "birthday", "hobby",
-        "location", "userCity", "favoriteAnimal", "favouriteAnimal",
-        "favoriteFootballTeam", "favouriteFootballTeam",
-        "personalMemory", "personalMemories", "longTermMemory"
+        "userName",
+        "name",
+        "favoriteColor",
+        "favouriteColor",
+        "favoriteFood",
+        "favouriteFood",
+        "birthday",
+        "hobby",
+        "location",
+        "favoriteAnimal",
+        "favouriteAnimal",
+        "favoriteFootballTeam",
+        "favouriteFootballTeam",
+        "personalMemory",
+        "personalMemories"
     ];
-    memoryKeys.forEach(function(key){ localStorage.removeItem(key); });
-    personalMemory = {};
-    longTermMemory = [];
+
+    memoryKeys.forEach(function(key){
+        localStorage.removeItem(key);
+    });
 
     chat.innerHTML += `
         <div class="ai-message">
@@ -1066,28 +1027,6 @@ if(lowerText.startsWith("forget memory ")){
                 JSON.stringify(memories)
             );
 
-            // Also remove stale copies from long-term memory.
-            const memoryTerms = {
-                name: /user'?s name|my name/i,
-                favoriteColor: /favo[u]?rite colo[u]?r/i,
-                favoriteFood: /favo[u]?rite food/i,
-                birthday: /birthday/i,
-                hobby: /hobby/i,
-                location: /location|lives in|user city/i,
-                favoriteAnimal: /favo[u]?rite animal/i,
-                favoriteFootballTeam: /favo[u]?rite football team/i
-            };
-            const pattern = memoryTerms[memoryKey];
-            if(pattern){
-                let longMemories = getLongTermMemory();
-                longMemories = longMemories.filter(function(item){
-                    const value = typeof item === "string" ? item : String(item && (item.memory || item.value || item.text) || "");
-                    return !pattern.test(value);
-                });
-                localStorage.setItem("longTermMemory", JSON.stringify(longMemories));
-                longTermMemory = longMemories;
-            }
-
             // Remove old storage keys too
             localStorage.removeItem(memoryKey);
 
@@ -1194,27 +1133,6 @@ if(lowerText.startsWith("forget my ")){
                 "personalMemory",
                 JSON.stringify(memories)
             );
-
-            const memoryTerms = {
-                name: /user'?s name|my name/i,
-                favoriteColor: /favo[u]?rite colo[u]?r/i,
-                favoriteFood: /favo[u]?rite food/i,
-                birthday: /birthday/i,
-                hobby: /hobby/i,
-                location: /location|lives in|user city/i,
-                favoriteAnimal: /favo[u]?rite animal/i,
-                favoriteFootballTeam: /favo[u]?rite football team/i
-            };
-            const pattern = memoryTerms[memoryKey];
-            if(pattern){
-                let longMemories = getLongTermMemory();
-                longMemories = longMemories.filter(function(item){
-                    const value = typeof item === "string" ? item : String(item && (item.memory || item.value || item.text) || "");
-                    return !pattern.test(value);
-                });
-                localStorage.setItem("longTermMemory", JSON.stringify(longMemories));
-                longTermMemory = longMemories;
-            }
 
             // Keep older storage keys synchronized
             localStorage.removeItem(memoryKey);
