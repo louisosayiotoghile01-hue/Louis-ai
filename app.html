@@ -20,6 +20,10 @@ window.MathJax = {
     src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
     async>
 </script>
+
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0d47a1">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 </head>
 
 <body>
@@ -79,5 +83,14 @@ onkeypress="if(event.key==='Enter') sendMessage();">
     No feedback yet.
 </div>
     </div>
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/service-worker.js")
+      .catch((error) => console.error("Louis AI service worker registration failed:", error));
+  });
+}
+</script>
 </body>
 </html>
