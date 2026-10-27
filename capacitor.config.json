@@ -1,0 +1,6 @@
+{
+  "appId": "com.louisai.assistant",
+  "appName": "Louis AI",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}
