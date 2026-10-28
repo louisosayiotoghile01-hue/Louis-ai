@@ -3,7 +3,7 @@
   "name": "Louis AI",
   "short_name": "Louis AI",
   "description": "Your smart AI assistant.",
-  "start_url": "/app.html",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
