@@ -1,12 +1,8 @@
-
 {
   "name": "louis-ai",
   "version": "2.0.0",
   "private": true,
   "description": "Louis AI personal assistant",
-  "scripts": {
-    "build": "echo \"Louis AI web app ready\""
-  },
   "dependencies": {
     "stripe": "^18.5.0"
   },
