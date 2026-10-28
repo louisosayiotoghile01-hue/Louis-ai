@@ -1,0 +1,46 @@
+
+name: Prepare Louis AI Android Project
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Prepare web files
+        run: |
+          mkdir -p www
+          cp index.html www/index.html
+          cp app.html www/app.html
+          cp style.css www/
+          cp script.js www/
+          cp knowledge.json www/
+          cp manifest.json www/
+          cp service-worker.js www/
+          cp -r icons www/
+
+      - name: Create Android project
+        run: npx cap add android
+      - name: Sync Android project
+        run: npx cap sync android
+      - name: Save Android project
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Create Louis AI Android project"
+          file_pattern: android/**
