@@ -35,8 +35,13 @@ jobs:
           cp service-worker.js www/
           cp -r icons www/
 
-      - name: Create Android project
-        run: npx cap add android
+      - name: Create Android project if missing
+        run: |
+         if [ ! -d android ]; then
+         npx cap add android
+         else
+         echo "Android project already exists. Reusing it."
+         fi
       - name: Sync Android project
         run: npx cap sync android
       - name: Save Android project as artifact
