@@ -39,8 +39,6 @@ jobs:
         run: npx cap add android
       - name: Sync Android project
         run: npx cap sync android
-      - name: Sync with latest GitHub changes
-        run: git pull --rebase origin main
       - name: Save Android project
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
