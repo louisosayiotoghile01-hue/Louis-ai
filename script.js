@@ -386,7 +386,7 @@ async function getAIResponse(message, history = []) {
 
     try {
 
-        const response = await fetch("/api/chat", {
+        const response = await fetch("https://louis-ai-fawn.vercel.app/api/chat", {
 
             method: "POST",
 
