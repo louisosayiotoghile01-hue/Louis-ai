@@ -35,7 +35,7 @@ export default async function handler(req, res) {
         if (
     session.payment_status !== "paid" ||
     session.mode !== "subscription" ||
-    priceId !== "price_1UNYXa8p9xrArmZiLSkKG9la"
+    priceId !== "price_1UMWpf8p9xrArmZicQ5pcG0c"
 ) {
     return res.status(400).json({
         success: false,
