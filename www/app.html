@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Louis AI</title>
+
+<link rel="stylesheet" href="style.css">
+<!-- MathJax: Render AI mathematical equations -->
+<script>
+window.MathJax = {
+    tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']]
+    }
+};
+</script>
+
+<script
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+    async>
+</script>
+
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0d47a1">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+</head>
+
+<body>
+<div class="louis-header">
+
+    <div class="louis-brand">
+        <div class="ai-icon">🤖</div>
+
+        <div>
+            <h1>Louis AI</h1>
+
+            <div class="ai-status">
+                <span class="status-dot"></span>
+                Online
+                <span class="version-badge">Version 2.0 Beta</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+    <div id="chat"></div>
+
+<div class="input-area">
+    
+<input
+id="userInput"
+type="text"
+placeholder="Type your message"
+onkeypress="if(event.key==='Enter') sendMessage();">
+
+<button onclick="sendMessage()">Send</button>
+<button onclick="clearChat()">Clear Chat</button>
+<button onclick="toggleDarkMode()">🌙 Dark Mode</button>
+<button onclick="startListening()">🎤 Speak</button>
+
+</div>
+
+</div>
+<script src="script.js"></script>
+    <!-- 📊 AI FEEDBACK DASHBOARD -->
+<div id="feedbackDashboard" style="margin:20px auto; max-width:500px; padding:15px; border-radius:12px; background:#f5f5f5;">
+
+    <h3>📊 AI Feedback</h3>
+
+    <p>👍 Positive: <span id="positiveFeedback">0</span></p>
+
+    <p>👎 Negative: <span id="negativeFeedback">0</span></p>
+
+    <p>💬 Total Feedback: <span id="totalFeedback">0</span></p>
+<p>📊 Feedback Entries: <span id="feedbackEntries">0</span></p>
+<p>📈 Positive Rate: <span id="positiveRate">0%</span></p>
+    <hr>
+
+<h3>📝 Recent Feedback</h3>
+
+<div id="recentFeedback">
+    No feedback yet.
+</div>
+    </div>
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/service-worker.js")
+      .catch((error) => console.error("Louis AI service worker registration failed:", error));
+  });
+}
+</script>
+</body>
+</html>
